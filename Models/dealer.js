@@ -8,7 +8,7 @@ const dealerSchema = new mongoose.Schema({
   userName: {
     type: String,
     required: true,
-    unique: true,
+    // unique: true,
   },
   password: {
     type: String,
@@ -37,37 +37,39 @@ const dealerSchema = new mongoose.Schema({
   COD: { type: Boolean },
   onlinePayment: { type: Boolean },
   TemporaryDisable: { type: Boolean },
+
   products: [
     {
-      productId: {
-        type: String,
-        unique: true,
+      productName: { type: String, required: true },
+      price: {
+        type: Number,
+        required: true,
       },
-      price: { type: Number },
-      category: { type: String },
-      noOfItem: { type: String },
-      defaultImage: { type: String },
-      productImages: [],
-      description: { type: String },
-      ProductActive: { type: Boolean },
+      category: { type: String, required: true },
+      noOfItem: { type: Number, required: true },
+      defaultImage: { type: String, required: true },
+      productImages: { type: Array, required: true },
+      description: { type: String, required: true },
+      productActive: { type: Boolean, required: true },
     },
   ],
-  orders: [
-    {
-      orderId: { type: String, unique: true },
-      email: { type: String },
-      address: { type: String },
-      mobile: { type: Number },
-      driver: { type: String },
-      orderStatus: { type: String },
-      items: [
-        {
-          itemId: { type: String },
-          Reference: { type: String },
-        },
-      ],
-    },
-  ],
+
+  // orders: [
+  //   {
+  //     orderId: new mongoose.Types.ObjectId(),
+  //     email: { type: String },
+  //     address: { type: String },
+  //     mobile: { type: Number },
+  //     driver: { type: String },
+  //     orderStatus: { type: String },
+  //     items: [
+  //       {
+  //         itemId: { type: String },
+  //         Reference: { type: String },
+  //       },
+  //     ],
+  //   },
+  // ],
 });
 
 module.exports = mongoose.model("dealer", dealerSchema);

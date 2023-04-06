@@ -24,7 +24,7 @@ const userRouter = require("./Routers/user");
 app.use("/", userRouter);
 
 const dealerRouter = require("./Routers/dealer");
-app.use("/dealer", dealerRouter);
+app.use("/dealers", dealerRouter);
 
 const adminRouter = require("./Routers/admin");
 app.use("/admin", adminRouter);

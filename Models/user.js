@@ -32,6 +32,10 @@ const userSchema = new mongoose.Schema({
   orders: {
     type: Array,
   },
+  active: {
+    type: Boolean,
+    default: true,
+  },
   cart: [
     {
       product: {

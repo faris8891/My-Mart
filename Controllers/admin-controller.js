@@ -24,7 +24,7 @@ module.exports = {
       }
     },
   },
-  
+
   Dealer: {
     get: async (req, res) => {
       try {
@@ -37,8 +37,9 @@ module.exports = {
     },
     post: async (req, res) => {
       dealerData = req.body;
+      console.log(dealerData);
       try {
-        dealerRegister = await dealer.insertMany({
+        const dealerRegister = await dealer.insertMany({
           fullName: dealerData.fullName,
           userName: dealerData.userName,
           password: dealerData.password,
@@ -48,8 +49,10 @@ module.exports = {
           mobile: dealerData.mobile,
           active: dealerData.active,
         });
+        console.log(dealerRegister);
         res.status(201).send("Created");
       } catch (error) {
+        console.log(error);
         res.status(400).send("Bad Request");
       }
     },
