@@ -36,7 +36,6 @@ const dealerSchema = new mongoose.Schema({
   },
   COD: { type: Boolean },
   onlinePayment: { type: Boolean },
-  TemporaryDisable: { type: Boolean },
 
   products: [
     {
@@ -54,22 +53,26 @@ const dealerSchema = new mongoose.Schema({
     },
   ],
 
-  // orders: [
-  //   {
-  //     orderId: new mongoose.Types.ObjectId(),
-  //     email: { type: String },
-  //     address: { type: String },
-  //     mobile: { type: Number },
-  //     driver: { type: String },
-  //     orderStatus: { type: String },
-  //     items: [
-  //       {
-  //         itemId: { type: String },
-  //         Reference: { type: String },
-  //       },
-  //     ],
-  //   },
-  // ],
+  orders: [
+    {
+      name: { type: String, required: true },
+      email: { type: String, required: true },
+      address: { type: String, required: true },
+      mobile: { type: Number, required: true },
+      driver: { type: String, required: true },
+      orderStatus: { default: "pending", type: String, required: true },
+      date: { type: Date, required: true },
+      product: [
+        {
+          productId: { type: String },
+          price: { type: Number },
+          totalPrice: { type: Number },
+          quantity: { type: Number },
+          dealerId: { type: String },
+        },
+      ],
+    },
+  ],
 });
 
 module.exports = mongoose.model("dealer", dealerSchema);

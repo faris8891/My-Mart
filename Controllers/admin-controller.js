@@ -28,15 +28,15 @@ module.exports = {
   Dealer: {
     get: async (req, res) => {
       try {
-        dealer = req.body;
-        dealerRegister = await dealer.find({}, { _id: 0, password: 0 });
+        const dealer = req.body;
+        const dealerData = await dealer.find({}, { _id: 0, password: 0 });
         res.status(200).json(dealerData);
       } catch (error) {
         res.status(404).send("Not Found");
       }
     },
     post: async (req, res) => {
-      dealerData = req.body;
+      const dealerData = req.body;
       console.log(dealerData);
       try {
         const dealerRegister = await dealer.insertMany({

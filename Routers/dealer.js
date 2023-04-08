@@ -1,7 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const { authentication } = require("../Middleware/authentication");
-const { login, products, users } = require("../Controllers/dealer-controller");
+const {
+  login,
+  products,
+  users,
+  feedback,
+} = require("../Controllers/dealer-controller");
 
 router.post("/login", login.Post);
 
@@ -15,4 +20,6 @@ router.post("/users", users.post);
 router.put("/users", users.put);
 router.patch("/users", users.patch);
 router.delete("/users", users.delete);
+router.get("/feedback", feedback.get);
+router.delete("/feedback", feedback.delete);
 module.exports = router;

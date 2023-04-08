@@ -38,12 +38,37 @@ const userSchema = new mongoose.Schema({
   },
   cart: [
     {
-      product: {
+      productName: {
         type: String,
-        ref: "product",
       },
-      totalPrice: {
+      dealerId: {
+        type: String,
+      },
+      productId: {
+        type: String,
+      },
+      
+      price: {
         type: Number,
+      },
+      quantity: {
+        type: Number,
+      },
+    },
+  ],
+  orderSummery: [
+    {
+      totalAmount: {
+        type: Number,
+      },
+      totalProducts: {
+        type: Number,
+      },
+      address: {
+        type: String,
+      },
+      paymentMode: {
+        type: String,
       },
     },
   ],

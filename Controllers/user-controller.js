@@ -1,7 +1,9 @@
 const users = require("../Models/user");
+const dealers = require("../Models/dealer");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 const jwt = require("jsonwebtoken");
+const { default: mongoose } = require("mongoose");
 require("dotenv").config();
 
 const jwt_key = process.env.JWT_KEY;
@@ -17,28 +19,27 @@ module.exports = {
     res.send("product POST");
   },
 
-  getLogin: (req, res) => {
-    res.send("login page");
-  },
-  postLogin: async (req, res) => {
-    try {
-      const { email, password } = req.body;
-      const user = await users.findOne({ email: email });
+  login: {
+    post: async (req, res) => {
+      try {
+        const { email, password } = req.body;
+        const user = await users.findOne({ email: email });
 
-      let hash = user.password;
-      bcrypt.compare(password, hash, function (err, result) {
-        if (result == true && email == user.email) {
-          const userToken = jwt.sign({ id: user._id }, jwt_key);
-          res.cookie("uid", userToken, { maxAge: 900000, httpOnly: true });
-          res.redirect("/home"); //------------------require edit
-        } else {
-          res.redirect("/login");
-        }
-      });
-    } catch (error) {
-      console.log(error);
-      res.redirect("/login");
-    }
+        let hash = user.password;
+        bcrypt.compare(password, hash, function (err, result) {
+          if (result == true && email == user.email) {
+            const userToken = jwt.sign({ id: user._id }, jwt_key);
+            res.cookie("uid", userToken, { maxAge: 900000, httpOnly: true });
+            res.redirect("/home"); //------------------require edit
+          } else {
+            res.redirect("/login");
+          }
+        });
+      } catch (error) {
+        console.log(error);
+        res.redirect("/login");
+      }
+    },
   },
 
   getMobile: (req, res) => {
@@ -53,51 +54,126 @@ module.exports = {
   postOtp: (req, res) => {
     res.send("otp received");
   },
-  getRegister: (req, res) => {
-    res.send(`{
-      "name":"",
-      "email":"",
-      "password":"",
-      "phone":"",
-      "location":"",
-      "address":"",
-      "flatNo":""
-    }`);
-  },
-  postRegister: async (req, res) => {
-    try {
-      const data = req.body;
-      const password = await bcrypt.hash(req.body.password, saltRounds);
-      const newUser = await users.insertMany({
-        fullName: data.fullName,
-        email: data.email,
-        password: password,
-        phone: data.phone,
-        location: data.location,
-        address: data.address,
-        flatNo: data.flatNo,
-      });
-      res.status(200);
-    } catch (error) {
-      console.log(error);
-    }
-  },
-  getCart: (req, res) => {
-    res.send("this is cart page");
-  },
-  postCart: async (req, res) => {
-    const cart = await users.updateOne(
-      { _id: req.query.user_id },
-      { $push: { cart: req.query.product_id } }
-    );
+
+  register: {
+    post: async (req, res) => {
+      try {
+        const data = req.body;
+        const password = await bcrypt.hash(req.body.password, saltRounds);
+        const newUser = await users.insertMany({
+          fullName: data.fullName,
+          email: data.email,
+          password: password,
+          phone: data.phone,
+          location: data.location,
+          address: data.address,
+          flatNo: data.flatNo,
+        });
+        res.status(200);
+      } catch (error) {
+        console.log(error);
+      }
+    },
   },
 
-  getOrder: (req, res) => {
-    res.send("this is order page");
+  cart: {
+    get:async (req, res) => {
+      try {
+        const userId = req.query.userId
+        const cartItem=await users.findOne({_id:userId})
+        console.log(cartItem.cart);
+        res.status(200).send('OK')
+      } catch (error) {
+        console.log(error);
+        res.status(404).send('Not Found')
+        
+      }
+    },
+    post: async (req, res) => {
+      try {
+        const dealer = req.query.dealerId;
+        const cartProduct = req.query.productId;
+        const userId = req.query.userId;
+
+        const product = await dealers.findOne(
+          {
+            _id: dealer,
+            "products._id": cartProduct,
+          },
+          { "products.$": true }
+        );
+        const quantity = req.body.quantity;
+        const dealerId = product._id;
+        const productId = product.products[0]._id;
+        const price = product.products[0].price;
+        const defaultImage = product.products[0].defaultImage;
+        const productName = product.products[0].productName;
+        // console.log(dealerId, productId, price, quantity);
+
+        const existingCart = await users.find({
+          "cart.productId": cartProduct,
+        });
+        // console.log(existingCart);
+
+        if (existingCart.length > 0) {
+          const quantity = await users.findOne(
+            {
+              _id: userId,
+              "cart.productId": cartProduct,
+            },
+            { "cart.quantity.$": true }
+          );
+          let existingQuantity = quantity.cart[0].quantity;
+          let updatedQuantity = ++existingQuantity;
+          // console.log(updatedQuantity);
+
+          const addCart = await users.updateOne(
+            {
+              _id: userId,
+              "cart.productId": cartProduct,
+            },
+            { $set: { "cart.$.quantity": updatedQuantity } }
+          );
+          // console.log(addCart, "+++++++++++");
+        } else {
+          const cart = await users.updateOne(
+            { _id: userId },
+            {
+              $push: {
+                cart: {
+                  productName: productName,
+                  dealerId: dealerId,
+                  productId: productId,
+                  price: price,
+                  defaultImage: defaultImage,
+                  quantity: quantity,
+                },
+              },
+            }
+          );
+        }
+
+        res.status(202).send("Accepted");
+      } catch (error) {
+        console.log(error);
+        res.status(400).send("Bad Request");
+      }
+    },
   },
-  postOrder: (req, res) => {
-    res.send("order POST");
+
+  orders: {
+    get: (req, res) => {
+      try {
+        res.status(200).send('OK')
+      } catch (error) {
+        res.status(404).send('Not Found')
+      }
+    },
+    post: (req, res) => {
+      
+    }
   },
+
   getFeedback: (req, res) => {
     res.send("this is feedback page");
   },

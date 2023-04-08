@@ -3,30 +3,26 @@ const router = express.Router();
 const { authentication } = require("../Middleware/authentication");
 const {
   getHome,
-  getLogin,
-  postLogin,
+  login,
   getMobile,
   postMobile,
   getOtp,
   postOtp,
-  getRegister,
-  postRegister,
+  register,
   getProducts,
   postProducts,
-  getCart,
-  postCart,
-  getOrder,
-  postOrder,
+  cart,
+  order,
   getFeedback,
   postFeedback,
   getOrderHistory,
   getLogout,
+  orders,
 } = require("../Controllers/user-controller");
 
 router.get("/home", getHome);
 
-router.get("/login", authentication, getLogin);
-router.post("/login", postLogin);
+router.post("/login", login.post);
 
 router.get("/mobile-login", getMobile);
 router.post("/mobile-login", postMobile);
@@ -34,17 +30,16 @@ router.post("/mobile-login", postMobile);
 router.get("/otp", getOtp);
 router.post("/otp", postOtp);
 
-router.get("/register", getRegister);
-router.post("/register", postRegister);
+router.post("/register", register.post);
 
 router.get("/products", getProducts);
 router.post("/products", postProducts);
 
-router.get("/cart", getCart);
-router.post("/cart", postCart);
+router.get("/cart", cart.get);
+router.post("/cart", cart.post);
 
-router.get("/orders", getOrder);
-router.post("/orders", postOrder);
+router.get("/orders", orders.get);
+router.post("/orders", orders.post);
 
 router.get("/feedbacks", getFeedback);
 router.post("/feedbacks", postFeedback);

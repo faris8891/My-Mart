@@ -30,6 +30,16 @@ module.exports = {
     },
   },
 
+  // orders: {
+  //   get: (req, res) => {
+  //     try {
+        
+  //     } catch (error) {
+        
+  //     }
+  //   }
+  // },
+
   products: {
     get: async (req, res) => {
       const dealerId = req.query.dealerId;
@@ -91,7 +101,6 @@ module.exports = {
             },
           }
         );
-        console.log(product);
         res.status(202).send("Accepted");
       } catch (error) {
         res.status(400).send("Bad Request");
@@ -207,5 +216,19 @@ module.exports = {
         res.status(400).send("Bad Request");
       }
     },
+  },
+
+  // -------------need to update------------
+  feedback: {
+    get: async (req, res) => {
+      try {
+        const feedback = await dealers.find({});
+        console.log(feedback);
+        res.status(200).send("OK");
+      } catch (error) {
+        res.status(404).send("Not Found");
+      }
+    },
+    delete: (req, res) => {},
   },
 };
