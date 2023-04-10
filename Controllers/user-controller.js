@@ -77,16 +77,28 @@ module.exports = {
   },
 
   cart: {
-    get:async (req, res) => {
+    get: async (req, res) => {
       try {
-        const userId = req.query.userId
-        const cartItem=await users.findOne({_id:userId})
-        console.log(cartItem.cart);
-        res.status(200).send('OK')
+        const userId = req.query.userId;
+        const user = await users.findOne({ _id: userId });
+        let totalAmount = 0;
+        let noOfItems = 0;
+        user.cart.forEach((products) => {
+          totalAmount = totalAmount + products.price * products.quantity;
+          noOfItems = noOfItems + products.quantity;
+        });
+
+        const cart = {
+          totalAmount: totalAmount,
+          noOfItems: noOfItems,
+          address: user.address,
+          defaultImage: user.defaultImage,
+          listOfItems: user.cart,
+        };
+        res.status(200).json(cart);
       } catch (error) {
         console.log(error);
-        res.status(404).send('Not Found')
-        
+        res.status(404).send("Not Found");
       }
     },
     post: async (req, res) => {
@@ -164,14 +176,12 @@ module.exports = {
   orders: {
     get: (req, res) => {
       try {
-        res.status(200).send('OK')
+        res.status(200).send("OK");
       } catch (error) {
-        res.status(404).send('Not Found')
+        res.status(404).send("Not Found");
       }
     },
-    post: (req, res) => {
-      
-    }
+    post: (req, res) => {},
   },
 
   getFeedback: (req, res) => {

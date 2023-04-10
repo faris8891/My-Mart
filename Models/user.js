@@ -41,6 +41,9 @@ const userSchema = new mongoose.Schema({
       productName: {
         type: String,
       },
+      defaultImage: {
+        type: String,
+      },
       dealerId: {
         type: String,
       },
@@ -56,22 +59,7 @@ const userSchema = new mongoose.Schema({
       },
     },
   ],
-  orderSummery: [
-    {
-      totalAmount: {
-        type: Number,
-      },
-      totalProducts: {
-        type: Number,
-      },
-      address: {
-        type: String,
-      },
-      paymentMode: {
-        type: String,
-      },
-    },
-  ],
+  
 });
 
 module.exports = mongoose.model("user", userSchema);
