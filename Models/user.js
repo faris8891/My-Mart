@@ -29,9 +29,6 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  orders: {
-    type: Array,
-  },
   active: {
     type: Boolean,
     default: true,
@@ -50,7 +47,6 @@ const userSchema = new mongoose.Schema({
       productId: {
         type: String,
       },
-      
       price: {
         type: Number,
       },
@@ -59,7 +55,6 @@ const userSchema = new mongoose.Schema({
       },
     },
   ],
-  
 });
 
 module.exports = mongoose.model("user", userSchema);

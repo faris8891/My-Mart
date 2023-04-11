@@ -3,7 +3,6 @@ const dealers = require("../Models/dealer");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 const jwt = require("jsonwebtoken");
-const { default: mongoose } = require("mongoose");
 require("dotenv").config();
 
 const jwt_key = process.env.JWT_KEY;
@@ -12,6 +11,7 @@ module.exports = {
   getHome: (req, res) => {
     res.send("This is home page");
   },
+
   getProducts: (req, res) => {
     res.send("product page");
   },
@@ -40,19 +40,6 @@ module.exports = {
         res.redirect("/login");
       }
     },
-  },
-
-  getMobile: (req, res) => {
-    res.send("This is mobile login page");
-  },
-  postMobile: (req, res) => {
-    res.send("Mobile number received");
-  },
-  getOtp: (req, res) => {
-    res.send("this is otp page");
-  },
-  postOtp: (req, res) => {
-    res.send("otp received");
   },
 
   register: {
@@ -106,7 +93,6 @@ module.exports = {
         const dealer = req.query.dealerId;
         const cartProduct = req.query.productId;
         const userId = req.query.userId;
-
         const product = await dealers.findOne(
           {
             _id: dealer,
@@ -164,8 +150,7 @@ module.exports = {
             }
           );
         }
-
-        res.status(202).send("Accepted");
+        res.status(200).send("OK");
       } catch (error) {
         console.log(error);
         res.status(400).send("Bad Request");
@@ -183,18 +168,10 @@ module.exports = {
     },
     post: (req, res) => {},
   },
-
-  getFeedback: (req, res) => {
-    res.send("this is feedback page");
-  },
-  postFeedback: (req, res) => {
-    res.send("feedback POST");
-  },
-  getOrderHistory: (req, res) => {
-    res.send("This is order history page");
-  },
-  getLogout: (req, res) => {
-    res.clearCookie("uid");
-    res.redirect("/home");
+  logout: {
+    get: (req, res) => {
+      res.clearCookie("uid");
+      res.redirect("/home");
+    },
   },
 };

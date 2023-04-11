@@ -1,5 +1,6 @@
 const dealers = require("../Models/dealer");
 const users = require("../Models/user");
+const orders = require("../Models/orders");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 const jwt = require("jsonwebtoken");
@@ -11,11 +12,13 @@ module.exports = {
   login: {
     Post: async (req, res) => {
       try {
-        const { username, password } = req.body;
-        const dealer = await dealers.findOne({ username: username });
+        const { userName, password } = req.body;
+        console.log(userName, password);
+        const dealer = await dealers.findOne({ userName: userName });
         let hash = dealer.password;
         bcrypt.compare(password, hash, function (err, result) {
-          if (result == true && username == dealer.username) {
+          console.log(result);
+          if (result == true && userName == dealer.userName) {
             const userToken = jwt.sign({ id: dealer._id }, jwt_key);
             res.cookie("uid", userToken, { maxAge: 900000, httpOnly: true });
             res.status(200).send("OK");
@@ -30,16 +33,6 @@ module.exports = {
     },
   },
 
-  // orders: {
-  //   get: (req, res) => {
-  //     try {
-        
-  //     } catch (error) {
-        
-  //     }
-  //   }
-  // },
-
   products: {
     get: async (req, res) => {
       const dealerId = req.query.dealerId;
@@ -47,7 +40,7 @@ module.exports = {
         const products = await dealers.find({ _id: dealerId }, { products: 1 });
         res.status(200).json(products);
       } catch (error) {
-        res.status(400).send("Bad Request");
+        res.status(404).send("Not Found");
       }
     },
     post: async (req, res) => {
@@ -218,11 +211,40 @@ module.exports = {
     },
   },
 
+  orders: {
+    get: async (req, res) => {
+      try {
+        const dealerId = req.query.dealerId;
+        const order = await orders.find({
+          dealerId: dealerId,
+          $or: [{ orderStatus: "confirmed" }, { orderStatus: "on the way" }],
+        });
+        res.status(200).json(order);
+      } catch (error) {
+        res.status(404).send("Not Found");
+      }
+    },
+    patch: async (req, res) => {
+      try {
+        const orderId = req.query.orderId;
+        const status = req.body.orderStatus;
+        const orderStatus = await orders.updateOne(
+          { _id: orderId },
+          {
+            orderStatus: status,
+          }
+        );
+        res.status(202).send("Accepted");
+      } catch (error) {
+        res.status(400).send("Bad Request");
+      }
+    },
+  },
   // -------------need to update------------
   feedback: {
     get: async (req, res) => {
       try {
-        const feedback = await dealers.find({});
+        const feedback = await dealers.find();
         console.log(feedback);
         res.status(200).send("OK");
       } catch (error) {

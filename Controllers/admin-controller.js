@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const jwt_key = process.env.JWT_KEY;
+const saltRounds = 10;
 
 module.exports = {
   login: {
@@ -36,20 +37,19 @@ module.exports = {
       }
     },
     post: async (req, res) => {
-      const dealerData = req.body;
-      console.log(dealerData);
       try {
+        const dealerData = req.body;
+        const password = await bcrypt.hash(dealerData.password, saltRounds);
         const dealerRegister = await dealer.insertMany({
           fullName: dealerData.fullName,
           userName: dealerData.userName,
-          password: dealerData.password,
+          password: password,
           storeImage: dealerData.storeImage,
           location: dealerData.location,
           address: dealerData.address,
           mobile: dealerData.mobile,
           active: dealerData.active,
         });
-        console.log(dealerRegister);
         res.status(201).send("Created");
       } catch (error) {
         console.log(error);
@@ -98,6 +98,12 @@ module.exports = {
       } catch (error) {
         res.status(400).send("Bad Request");
       }
+    },
+  },
+  logout: {
+    get: (req, res) => {
+      res.clearCookie("uid");
+      res.status(200).send("OK");
     },
   },
 };
