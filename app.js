@@ -4,7 +4,7 @@ const app = express();
 const cors = require("cors");
 
 const cookie = require("cookie-parser");
-
+app.use(cookie());
 app.use(bodyParser.json());
 app.use(cookie());
 app.use(cors());
@@ -21,12 +21,13 @@ mongoose.connect(key).then(() => console.log("Mongo Db connected"));
 
 // -----------------Routers---------------------
 const userRouter = require("./Routers/user");
-app.use("/", userRouter);
+app.use("/users", userRouter);
 
 const dealerRouter = require("./Routers/dealer");
 app.use("/dealers", dealerRouter);
 
 const adminRouter = require("./Routers/admin");
+const cookieParser = require("cookie-parser");
 app.use("/admin", adminRouter);
 
 // -----------------Express server connect---------------------

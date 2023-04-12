@@ -18,14 +18,14 @@ router.post("/login", login.post);
 
 router.post("/register", register.post);
 
-router.get("/cart", cart.get);
-router.post("/cart", cart.post);
+router.get("/cart",authentication.users, cart.get);
+router.post("/cart",authentication.users, cart.post);
 
 // router.get("/orders", usersOrders.get);
-router.post("/orders", usersOrders.post);
+router.post("/orders",authentication.users, usersOrders.post);
 
-router.post("/payment", payment.post);
+router.post("/payment",authentication.users, payment.post);
 
-router.get("/logout", logout.get);
+router.get("/logout",authentication.users, logout.get);
 
 module.exports = router;

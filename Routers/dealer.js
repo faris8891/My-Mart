@@ -7,9 +7,14 @@ const {
   users,
   orders,
   feedback,
+  profile,
 } = require("../Controllers/dealer-controller");
 
 router.post("/login", login.Post);
+
+router.get("/profile", authentication.dealers, profile.get);
+router.put("/profile", authentication.dealers, profile.put);
+
 
 router.get("/products", authentication.dealers, products.get);
 router.post("/products", authentication.dealers, products.post);
@@ -18,10 +23,6 @@ router.patch("/products", authentication.dealers, products.patch);
 router.delete("/products", authentication.dealers, products.delete);
 
 router.get("/users", authentication.dealers, users.get);
-router.post("/users", authentication.dealers, users.post);
-router.put("/users", authentication.dealers, users.put);
-router.patch("/users", authentication.dealers, users.patch);
-router.delete("/users", authentication.dealers, users.delete);
 
 router.get("/orders", authentication.dealers, orders.get);
 router.patch("/orders", authentication.dealers, orders.patch);

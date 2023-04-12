@@ -11,7 +11,6 @@ module.exports = {
   getHome: (req, res) => {
     res.send("This is home page");
   },
-
   getProducts: (req, res) => {
     res.send("product page");
   },
@@ -24,20 +23,19 @@ module.exports = {
       try {
         const { email, password } = req.body;
         const user = await users.findOne({ email: email });
-
         let hash = user.password;
         bcrypt.compare(password, hash, function (err, result) {
           if (result == true && email == user.email) {
             const userToken = jwt.sign({ id: user._id }, jwt_key);
-            res.cookie("uid", userToken, { maxAge: 900000, httpOnly: true });
-            res.redirect("/home"); //------------------require edit
+            res.cookie("userId", userToken, { maxAge: 900000, httpOnly: true });
+            res.status(200).send("OK");
           } else {
-            res.redirect("/login");
+            res.status(401).send("Unauthorized");
           }
         });
       } catch (error) {
         console.log(error);
-        res.redirect("/login");
+        res.status(400).send("Bad Request");
       }
     },
   },
@@ -46,7 +44,8 @@ module.exports = {
     post: async (req, res) => {
       try {
         const data = req.body;
-        const password = await bcrypt.hash(req.body.password, saltRounds);
+        console.log(data);
+        const password = await bcrypt.hash(data.password, saltRounds);
         const newUser = await users.insertMany({
           fullName: data.fullName,
           email: data.email,
@@ -56,9 +55,10 @@ module.exports = {
           address: data.address,
           flatNo: data.flatNo,
         });
-        res.status(200);
+        res.status(201).send("Created");
       } catch (error) {
         console.log(error);
+        res.status(400).send("Bad Request");
       }
     },
   },
@@ -66,7 +66,7 @@ module.exports = {
   cart: {
     get: async (req, res) => {
       try {
-        const userId = req.query.userId;
+        const userId = req.body.id;
         const user = await users.findOne({ _id: userId });
         let totalAmount = 0;
         let noOfItems = 0;
@@ -92,7 +92,7 @@ module.exports = {
       try {
         const dealer = req.query.dealerId;
         const cartProduct = req.query.productId;
-        const userId = req.query.userId;
+        const userId = req.body.id;
         const product = await dealers.findOne(
           {
             _id: dealer,
