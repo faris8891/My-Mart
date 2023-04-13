@@ -83,7 +83,7 @@ module.exports = {
     post: async (req, res) => {
       try {
         data = req.body;
-        dealerId = req.query.dealerId;
+        const dealerId =  req.body.id;
         const product = await dealers.updateOne(
           { _id: dealerId },
           {
@@ -109,7 +109,7 @@ module.exports = {
     put: async (req, res) => {
       try {
         const data = req.body;
-        const dealerId = req.query.dealerId;
+        const dealerId =  req.body.id;
         const productId = req.query.productId;
         console.log(dealerId, productId);
         const product = await dealers.updateOne(
@@ -137,7 +137,7 @@ module.exports = {
     patch: async (req, res) => {
       try {
         const data = req.body;
-        const dealerId = req.query.dealerId;
+        const dealerId =  req.body.id;
         const productId = req.query.productId;
         const product = await dealers.updateOne(
           {
@@ -154,7 +154,7 @@ module.exports = {
     delete: async (req, res) => {
       try {
         const data = req.body;
-        const dealerId = req.query.dealerId;
+        const dealerId =  req.body.id;
         const productId = req.query.productId;
         const product = await dealers.findOneAndUpdate(
           { _id: dealerId },
@@ -181,14 +181,15 @@ module.exports = {
       }
     },
   },
-
+  
+  // -------------need to update------------
   orders: {
     get: async (req, res) => {
       try {
-        const dealerId = req.query.dealerId;
+        const dealerId =  req.body.id;
         const order = await orders.find({
           dealerId: dealerId,
-          $or: [{ orderStatus: "confirmed" }, { orderStatus: "on the way" }],
+          $or: [{ orderStatus: "pending" },{ orderStatus: "confirmed" }, { orderStatus: "on the way" }],
         });
         res.status(200).json(order);
       } catch (error) {
@@ -211,7 +212,6 @@ module.exports = {
       }
     },
   },
-  // -------------need to update------------
   feedback: {
     get: async (req, res) => {
       try {

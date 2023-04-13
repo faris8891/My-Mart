@@ -2,30 +2,36 @@ const express = require("express");
 const router = express.Router();
 const { authentication } = require("../Middleware/authentication");
 const {
-  getHome,
+  profile,
   login,
   register,
+  products,
   cart,
   logout,
-  orders,
 } = require("../Controllers/user-controller");
 
-const { usersOrders,payment } = require("../Controllers/orders-controller");
-
-router.get("/home", getHome);
+const { checkout, payment,feedback } = require("../Controllers/orders-controller");
 
 router.post("/login", login.post);
-
 router.post("/register", register.post);
 
-router.get("/cart",authentication.users, cart.get);
-router.post("/cart",authentication.users, cart.post);
+router.get('/products',products.get)
+
+router.get("/profiles",authentication.users, profile.get);
+router.put("/profiles",authentication.users, profile.put);
+router.delete("/profiles", authentication.users, profile.delete);
+
+router.get("/cart", authentication.users, cart.get);
+router.post("/cart", authentication.users, cart.post);
+router.delete("/cart", authentication.users, cart.delete);
 
 // router.get("/orders", usersOrders.get);
-router.post("/orders",authentication.users, usersOrders.post);
+router.post("/checkout", authentication.users, checkout.post);
 
-router.post("/payment",authentication.users, payment.post);
+router.patch("/feedback", authentication.users, feedback.put);
 
-router.get("/logout",authentication.users, logout.get);
+router.post("/payment", authentication.users, payment.post);
+
+router.get("/logout", authentication.users, logout.get);
 
 module.exports = router;

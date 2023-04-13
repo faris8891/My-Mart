@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const orderSchema = new mongoose.Schema({
   orderId: {
     type: String,
-    unique:true
+    unique: true,
   },
   userId: {
     type: String,
@@ -30,8 +30,12 @@ const orderSchema = new mongoose.Schema({
     type: Boolean,
   },
   orderStatus: {
-    type: String
+    type: String,
+    default: "Pending",
   },
+  feedback: {
+    type:String
+  }
 });
 
 module.exports = mongoose.model("order", orderSchema);

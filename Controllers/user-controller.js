@@ -1,5 +1,6 @@
 const users = require("../Models/user");
 const dealers = require("../Models/dealer");
+const orders = require("../Models/orders");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 const jwt = require("jsonwebtoken");
@@ -8,14 +9,50 @@ require("dotenv").config();
 const jwt_key = process.env.JWT_KEY;
 
 module.exports = {
-  getHome: (req, res) => {
-    res.send("This is home page");
-  },
-  getProducts: (req, res) => {
-    res.send("product page");
-  },
-  postProducts: (req, res) => {
-    res.send("product POST");
+  profile: {
+    get: async (req, res) => {
+      try {
+        const id = req.body.id;
+        const userProfile = await users.findOne(
+          { _id: id },
+          { password: 0, cart: 0 }
+        );
+        res.status(200).json(userProfile);
+      } catch (error) {
+        res.status(404).send("Not Found");
+      }
+    },
+
+    put: async (req, res) => {
+      try {
+        const data = req.body;
+        const userProfile = await users.updateOne(
+          { _id: data.id },
+          {
+            $set: {
+              fullName: data.fullName,
+              phone: data.phone,
+              location: data.location,
+              address: data.address,
+              flatNo: data.flatNo,
+            },
+          }
+        );
+        res.status(202).send("Accepted");
+      } catch (error) {
+        console.log(error);
+        res.status(400).send("Bad Request");
+      }
+    },
+    delete: async (req, res) => {
+      try {
+        const id = req.body.id;
+        const userProfile = await users.deleteOne({ _id: id });
+        res.status(202).send("Accepted");
+      } catch (error) {
+        res.status(400).send("Bad Request");
+      }
+    },
   },
 
   login: {
@@ -44,7 +81,6 @@ module.exports = {
     post: async (req, res) => {
       try {
         const data = req.body;
-        console.log(data);
         const password = await bcrypt.hash(data.password, saltRounds);
         const newUser = await users.insertMany({
           fullName: data.fullName,
@@ -63,6 +99,16 @@ module.exports = {
     },
   },
 
+  products: {
+    get: async (req, res) => {
+      try {
+        const products = await dealers.find({ active: true }, { password: 0 });
+        res.status(200).json(products);
+      } catch (error) {
+        res.status(404).send("Not Found");
+      }
+    },
+  },
   cart: {
     get: async (req, res) => {
       try {
@@ -74,13 +120,13 @@ module.exports = {
           totalAmount = totalAmount + products.price * products.quantity;
           noOfItems = noOfItems + products.quantity;
         });
-
         const cart = {
           totalAmount: totalAmount,
           noOfItems: noOfItems,
           address: user.address,
           defaultImage: user.defaultImage,
           listOfItems: user.cart,
+          description: user.description,
         };
         res.status(200).json(cart);
       } catch (error) {
@@ -88,6 +134,7 @@ module.exports = {
         res.status(404).send("Not Found");
       }
     },
+
     post: async (req, res) => {
       try {
         const dealer = req.query.dealerId;
@@ -106,6 +153,7 @@ module.exports = {
         const price = product.products[0].price;
         const defaultImage = product.products[0].defaultImage;
         const productName = product.products[0].productName;
+        const description = product.products[0].description;
         // console.log(dealerId, productId, price, quantity);
 
         const existingCart = await users.find({
@@ -145,6 +193,7 @@ module.exports = {
                   price: price,
                   defaultImage: defaultImage,
                   quantity: quantity,
+                  description: description,
                 },
               },
             }
@@ -156,22 +205,39 @@ module.exports = {
         res.status(400).send("Bad Request");
       }
     },
-  },
-
-  orders: {
-    get: (req, res) => {
+    delete: async (req, res) => {
       try {
-        res.status(200).send("OK");
+        const data = req.body;
+        const productId = req.query.productId;
+        const product = await users.findOneAndUpdate(
+          { _id: data.id },
+          {
+            $pull: {
+              cart: {
+                productId: productId,
+              },
+            },
+          }
+        );
+        const userToken = jwt.sign({ id: data.id }, jwt_key);
+        res.cookie("userId", userToken, { maxAge: 0, httpOnly: true });
+        res.status(202).send("Accepted");
       } catch (error) {
-        res.status(404).send("Not Found");
+        res.status(400).send("Bad Request");
       }
     },
-    post: (req, res) => {},
   },
+
   logout: {
     get: (req, res) => {
-      res.clearCookie("uid");
-      res.redirect("/home");
+      try {
+        const data = req.body;
+        const userToken = jwt.sign({ id: data.id }, jwt_key);
+        res.cookie("userId", userToken, { maxAge: 0, httpOnly: true });
+        res.status(202).send("Accepted");
+      } catch (error) {
+        res.status(400).send("Bad Request");
+      }
     },
   },
 };

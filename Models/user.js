@@ -37,22 +37,31 @@ const userSchema = new mongoose.Schema({
     {
       productName: {
         type: String,
+        required: true,
       },
       defaultImage: {
         type: String,
+        required: true,
       },
       dealerId: {
         type: String,
+        required: true,
       },
       productId: {
         type: String,
+        required: true,
       },
       price: {
         type: Number,
+        required: true,
       },
       quantity: {
         type: Number,
+        required: true,
       },
+      description: {
+        type: String,
+      }
     },
   ],
 });

@@ -74,17 +74,17 @@ module.exports = {
       try {
         id = req.query.id;
         const dealerData = req.body;
-        const password = await bcrypt.hash(dealerData.password, saltRounds);
         dealerUpdate = await dealers.updateOne(
           { _id: id },
           {
-            fullName: dealerData.fullName,
-            userName: dealerData.userName,
-            password: password,
-            storeImage: dealerData.storeImage,
-            location: dealerData.location,
-            address: dealerData.address,
-            mobile: dealerData.mobile,
+            $set: {
+              fullName: dealerData.fullName,
+              userName: dealerData.userName,
+              storeImage: dealerData.storeImage,
+              location: dealerData.location,
+              address: dealerData.address,
+              mobile: dealerData.mobile,
+            },
           }
         );
         res.status(202).send("Accepted");
