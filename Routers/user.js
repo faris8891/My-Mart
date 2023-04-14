@@ -7,10 +7,13 @@ const {
   register,
   products,
   cart,
+  feedback,
   logout,
+  checkout,
+  orderHistory
 } = require("../Controllers/user-controller");
 
-const { checkout, payment,feedback } = require("../Controllers/orders-controller");
+const { payment } = require("../Controllers/orders-controller");
 
 router.post("/login", login.post);
 router.post("/register", register.post);
@@ -28,7 +31,9 @@ router.delete("/cart", authentication.users, cart.delete);
 // router.get("/orders", usersOrders.get);
 router.post("/checkout", authentication.users, checkout.post);
 
-router.patch("/feedback", authentication.users, feedback.put);
+router.get("/orders-history", authentication.users, orderHistory.get);
+
+router.patch("/feedback", authentication.users, feedback.patch);
 
 router.post("/payment", authentication.users, payment.post);
 

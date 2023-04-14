@@ -17,6 +17,9 @@ const orderSchema = new mongoose.Schema({
   orderDate: {
     type: String,
   },
+  items: {
+    type:Array
+  },
   quantity: {
     type: Number,
   },
@@ -34,8 +37,9 @@ const orderSchema = new mongoose.Schema({
     default: "Pending",
   },
   feedback: {
-    type:String
-  }
+    message: { type: String },
+    rating: { type: Number },
+  },
 });
 
 module.exports = mongoose.model("order", orderSchema);

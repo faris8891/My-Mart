@@ -8,13 +8,13 @@ const {
   orders,
   feedback,
   profile,
+  orderHistory,
 } = require("../Controllers/dealer-controller");
 
 router.post("/login", login.Post);
 
 router.get("/profile", authentication.dealers, profile.get);
 router.put("/profile", authentication.dealers, profile.put);
-
 
 router.get("/products", authentication.dealers, products.get);
 router.post("/products", authentication.dealers, products.post);
@@ -26,6 +26,7 @@ router.get("/users", authentication.dealers, users.get);
 
 router.get("/orders", authentication.dealers, orders.get);
 router.patch("/orders", authentication.dealers, orders.patch);
+router.get("/orders-history", authentication.users, orderHistory.get);
 
 router.get("/feedback", authentication.dealers, feedback.get);
 router.delete("/feedback", authentication.dealers, feedback.delete);
