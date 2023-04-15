@@ -11,12 +11,15 @@ const {
   logout,
   checkout,
   orderHistory,
-  payment
+  payment,
+  otpLogin
 } = require("../Controllers/user-controller");
 
 
-router.post("/login", login.post);
 router.post("/register", register.post);
+router.post("/login", login.post);
+router.post("/otp-login",otpLogin.post)
+router.put("/otp-login",otpLogin.put)
 
 router.get('/products',products.get)
 

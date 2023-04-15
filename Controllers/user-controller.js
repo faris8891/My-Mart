@@ -6,8 +6,11 @@ const saltRounds = 10;
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const razorpay = require("razorpay");
+const fast2sms = require("fast-two-sms");
+
 require("dotenv").config();
 
+const FAST_SMS = process.env.FAST_SMS;
 const RZP_ID = process.env.RZP_ID;
 const RZP_KEY = process.env.RZP_KEY;
 const jwt_key = process.env.JWT_KEY;
@@ -78,6 +81,63 @@ module.exports = {
       } catch (error) {
         console.log(error);
         res.status(400).send("Bad Request");
+      }
+    },
+  },
+
+  otpLogin: {
+    post: async (req, res) => {
+      try {
+        const userPhone = req.body.phone;
+        const otp = 10000 + Math.floor(Math.random() * 89999);
+        const data = await users.findOne({ phone: userPhone });
+        const jwtData = { phone: data.phone, otp: otp };
+        console.log(jwtData);
+
+        if (data) {
+          let options = {
+            authorization: FAST_SMS,
+            message: `Dear customer, use this One Time Password ${otp} to log in to your MyMart account. This OTP will be valid for the next 5 mins.`,
+            numbers: [userPhone],
+          };
+
+          await fast2sms
+            .sendMessage(options)
+            .then((response) => {
+              const userToken = jwt.sign(jwtData, jwt_key);
+              res.cookie("otpLogin", userToken, {
+                maxAge: 1000 * 60 * 400,
+                httpOnly: true,
+              });
+              res.status(200).send("OK");
+            })
+            .catch((error) => {
+              console.log(error);
+              res.status(404).send("Not Found");
+            });
+        } else {
+          res.status(404).send("User Not Found");
+        }
+      } catch (error) {
+        console.log(error);
+        res.status(400).send("Bad Request");
+      }
+    },
+    put: async (req, res) => {
+      try {
+        const otp = req.body.otp;
+        const data = req.cookies;
+        const expectedData = jwt.verify(data.otpLogin, jwt_key);
+        if (otp == expectedData.otp) {
+          const user = await users.findOne({ mob: expectedData.mob });
+          const userToken = jwt.sign({ id: user._id }, jwt_key);
+          res.cookie("userId", userToken, { maxAge: 900000, httpOnly: true });
+          res.status(202).send("Accepted");
+        } else {
+          res.status(404).send("Not Found");
+        }
+      } catch (error) {
+        res.status(401).send("Unauthorized user");
       }
     },
   },
@@ -174,7 +234,7 @@ module.exports = {
             },
             { "cart.quantity.$": true }
           );
-          
+
           let existingQuantity = quantity.cart[0].quantity;
           let updatedQuantity = ++existingQuantity;
           // console.log(updatedQuantity);
@@ -253,7 +313,7 @@ module.exports = {
             httpOnly: true,
           });
           console.log(order);
-          res.status(200).send({ orderId: order.id });
+          res.status(200).json({ orderId: order.id });
         });
       } catch (error) {
         console.log(error);
