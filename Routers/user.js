@@ -10,10 +10,10 @@ const {
   feedback,
   logout,
   checkout,
-  orderHistory
+  orderHistory,
+  payment
 } = require("../Controllers/user-controller");
 
-const { payment } = require("../Controllers/orders-controller");
 
 router.post("/login", login.post);
 router.post("/register", register.post);
@@ -28,15 +28,15 @@ router.get("/cart", authentication.users, cart.get);
 router.post("/cart", authentication.users, cart.post);
 router.delete("/cart", authentication.users, cart.delete);
 
-// router.get("/orders", usersOrders.get);
 router.post("/checkout", authentication.users, checkout.post);
+router.post("/pay",authentication.users,payment.post)
+router.post("/pay-verify",payment.verify)
 
 router.get("/orders-history", authentication.users, orderHistory.get);
 
 router.patch("/feedback", authentication.users, feedback.patch);
 
-router.post("/payment", authentication.users, payment.post);
-
 router.get("/logout", authentication.users, logout.get);
+
 
 module.exports = router;

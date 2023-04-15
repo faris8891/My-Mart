@@ -30,6 +30,10 @@ const adminRouter = require("./Routers/admin");
 const cookieParser = require("cookie-parser");
 app.use("/admin", adminRouter);
 
+app.get('/test-pay', (req, res) => {
+  
+})
+
 // -----------------Express server connect---------------------
 app.listen(port, () => {
   console.log(`Express Server Connected at ${port}`);

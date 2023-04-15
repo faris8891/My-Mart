@@ -5,8 +5,11 @@ const bcrypt = require("bcrypt");
 const saltRounds = 10;
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
+const razorpay = require("razorpay");
 require("dotenv").config();
 
+const RZP_ID = process.env.RZP_ID;
+const RZP_KEY = process.env.RZP_KEY;
 const jwt_key = process.env.JWT_KEY;
 
 module.exports = {
@@ -60,6 +63,7 @@ module.exports = {
     post: async (req, res) => {
       try {
         const { email, password } = req.body;
+        console.log(req.body);
         const user = await users.findOne({ email: email });
         let hash = user.password;
         bcrypt.compare(password, hash, function (err, result) {
@@ -170,6 +174,7 @@ module.exports = {
             },
             { "cart.quantity.$": true }
           );
+          
           let existingQuantity = quantity.cart[0].quantity;
           let updatedQuantity = ++existingQuantity;
           // console.log(updatedQuantity);
@@ -228,6 +233,58 @@ module.exports = {
       }
     },
   },
+  // -------------------------------payment-------------------
+  payment: {
+    post: (req, res) => {
+      try {
+        let instance = new razorpay({
+          key_id: RZP_ID,
+          key_secret: RZP_KEY,
+        });
+        let options = {
+          amount: req.body.totalAmount,
+          currency: "INR",
+          receipt: "My-mart:" + crypto.randomBytes(7).toString("hex"),
+        };
+        instance.orders.create(options, function (err, order) {
+          const userToken = jwt.sign({ orderId: order.id }, jwt_key);
+          res.cookie("orderId", userToken, {
+            maxAge: 1000 * 60 * 60 * 24,
+            httpOnly: true,
+          });
+          console.log(order);
+          res.status(200).send({ orderId: order.id });
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    verify: (req, res) => {
+      try {
+        const data = req.cookies.orderId;
+        const razorpaySignature = req.body.razorpay_signature;
+        const razorpayPaymentId = req.body.razorpay_payment_id;
+        const orderId = jwt.verify(data, jwt_key).orderId;
+        console.log(orderId, "==========");
+        const generatedSignature = crypto
+          .createHmac("sha256", RZP_KEY)
+          .update(orderId + "|" + razorpayPaymentId)
+          .digest("hex");
+        console.log(generatedSignature, "--------", razorpaySignature);
+
+        if (generatedSignature === razorpaySignature) {
+          res.status(200).send("OK");
+        } else {
+          res.status(404).send("Not Found");
+        }
+      } catch (error) {
+        console.log(error);
+        res.status(400).send("Bad Request");
+      }
+    },
+  },
+
+  // ------------checkout to be update asper payment-------------------
 
   checkout: {
     post: async (req, res) => {
@@ -248,6 +305,7 @@ module.exports = {
 
         const cart = await users.findOne({ _id: userId }, { cart: 1 });
         console.log(cart);
+
         const order = await orders.insertMany({
           orderId: "My-mart:" + crypto.randomBytes(7).toString("hex"),
           userId: userId,
@@ -259,7 +317,7 @@ module.exports = {
           paymentMode: orderData.paymentMode,
           paymentStatus: orderData.paymentStatus,
           orderStatus: orderData.orderStatus,
-          items:user.cart
+          items: user.cart,
         });
 
         const clearCart = await users.findOneAndUpdate(
@@ -279,7 +337,7 @@ module.exports = {
       try {
         const orderId = req.query.orderId;
         const data = req.body;
-        console.log(data,orderId);
+        console.log(data, orderId);
         const feedback = await orders.updateOne(
           { userId: data.id, _id: orderId, orderStatus: "delivered" },
           {
@@ -300,15 +358,15 @@ module.exports = {
   orderHistory: {
     get: async (req, res) => {
       try {
-        const userId=req.body.id
-        const orderHistory=await orders.find({userId:userId})
-        res.status(200).json(orderHistory)
+        const userId = req.body.id;
+        const orderHistory = await orders.find({ userId: userId });
+        res.status(200).json(orderHistory);
       } catch (error) {
-        res.status(404).send('Not Found')
+        res.status(404).send("Not Found");
       }
-    }
+    },
   },
-  
+
   logout: {
     get: (req, res) => {
       try {
