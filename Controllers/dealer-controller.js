@@ -182,7 +182,6 @@ module.exports = {
     },
   },
 
-  // -------------need to update------------
   orders: {
     get: async (req, res) => {
       try {

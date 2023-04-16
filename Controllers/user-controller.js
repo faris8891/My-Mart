@@ -293,7 +293,6 @@ module.exports = {
       }
     },
   },
-  // -------------------------------payment-------------------
   payment: {
     post: (req, res) => {
       try {
@@ -343,8 +342,6 @@ module.exports = {
       }
     },
   },
-
-  // ------------checkout to be update asper payment-------------------
 
   checkout: {
     post: async (req, res) => {

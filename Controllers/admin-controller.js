@@ -117,7 +117,6 @@ module.exports = {
     },
   },
 
-  // -----------------------------copy from dealer--------------
   users: {
     get: async (req, res) => {
       try {
@@ -197,7 +196,6 @@ module.exports = {
       }
     },
   },
-  // -------------------------------------------
 
   logout: {
     get: (req, res) => {
