@@ -97,7 +97,7 @@ module.exports = {
         if (data) {
           let options = {
             authorization: FAST_SMS,
-            message: `Dear customer, use this One Time Password ${otp} to log in to your MyMart account. This OTP will be valid for the next 5 mins.`,
+            message: `Dear customer, use this OTP ${otp} to log in to your MyMart account. Valid for the next 5 mins.`,
             numbers: [userPhone],
           };
 
@@ -294,7 +294,7 @@ module.exports = {
     },
   },
   payment: {
-    post: (req, res) => {
+    post: async (req, res) => {
       try {
         let instance = new razorpay({
           key_id: RZP_ID,

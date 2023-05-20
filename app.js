@@ -6,7 +6,6 @@ const cors = require("cors");
 const cookie = require("cookie-parser");
 app.use(cookie());
 app.use(bodyParser.json());
-app.use(cookie());
 app.use(cors());
 
 // -----------------ENV---------------------
@@ -30,9 +29,6 @@ const adminRouter = require("./Routers/admin");
 const cookieParser = require("cookie-parser");
 app.use("/admin", adminRouter);
 
-app.get('/test-pay', (req, res) => {
-  
-})
 
 // -----------------Express server connect---------------------
 app.listen(port, () => {
