@@ -12,17 +12,22 @@ module.exports = {
     async post(req, res) {
       try {
         const { userName, password } = req.body;
+        console.log(req.body);
         const adminData = await admin.findOne({ userName: userName });
+        console.log(adminData);
         if (password == adminData.password && userName == adminData.userName) {
           const userToken = jwt.sign({ id: adminData._id }, jwt_key);
-          res.cookie("adminId", userToken, { maxAge: 900000, httpOnly: true });
-          res.status(200).send("OK");
+          res.status(200).json(userToken);
         } else {
-          res.status(400).send("Bad Request");
+          res
+            .status(401)
+            .send("You have entered an invalid username or password");
         }
       } catch (error) {
         console.log(error);
-        res.status(401).send("Unauthorized");
+        res
+          .status(401)
+          .send("You have entered an invalid username or password");
       }
     },
   },
