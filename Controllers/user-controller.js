@@ -66,7 +66,6 @@ module.exports = {
     post: async (req, res) => {
       try {
         const { email, password } = req.body;
-        console.log(req.body);
         const user = await users.findOne({ email: email });
         let hash = user.password;
         bcrypt.compare(password, hash, function (err, result) {

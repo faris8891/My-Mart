@@ -12,11 +12,12 @@ module.exports = {
     async post(req, res) {
       try {
         const { userName, password } = req.body;
-        console.log(req.body);
         const adminData = await admin.findOne({ userName: userName });
-        console.log(adminData);
         if (password == adminData.password && userName == adminData.userName) {
-          const userToken = jwt.sign({ id: adminData._id }, jwt_key);
+          const userToken = jwt.sign({ id: adminData._id }, jwt_key, {
+            expiresIn: "1d",
+          });
+          res.cookie("adminId", userToken, { httpOnly: true });
           res.status(200).json(userToken);
         } else {
           res
@@ -48,6 +49,7 @@ module.exports = {
 
   Dealer: {
     get: async (req, res) => {
+      console.log();
       try {
         const dealersData = await dealers.find({}, { password: 0 });
         res.status(200).json(dealersData);

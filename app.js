@@ -6,7 +6,8 @@ const cors = require("cors");
 const cookie = require("cookie-parser");
 app.use(cookie());
 app.use(bodyParser.json());
-app.use(cors());
+app.use(cors())
+
 
 // -----------------ENV---------------------
 require("dotenv").config();
@@ -28,7 +29,6 @@ app.use("/dealers", dealerRouter);
 const adminRouter = require("./Routers/admin");
 const cookieParser = require("cookie-parser");
 app.use("/admin", adminRouter);
-
 
 // -----------------Express server connect---------------------
 app.listen(port, () => {

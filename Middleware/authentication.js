@@ -5,7 +5,7 @@ const jwt_key = process.env.JWT_KEY;
 module.exports.authentication = {
   admin: async (req, res, next) => {
     try {
-      const adminId = req.cookies.adminId;
+      const adminId = req.headers.adminid;
       let data = jwt.verify(adminId, jwt_key).id;
       req.body.id = data;
       next();
