@@ -60,8 +60,9 @@ module.exports = {
     post: async (req, res) => {
       try {
         const dealerData = req.body;
+        console.log(req.body);
         const password = await bcrypt.hash(dealerData.password, saltRounds);
-        const dealerRegister = await dealers.insertMany({
+        await dealers.insertMany({
           fullName: dealerData.fullName,
           userName: dealerData.userName,
           password: password,
