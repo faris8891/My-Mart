@@ -80,8 +80,8 @@ module.exports = {
     },
     put: async (req, res) => {
       try {
-        id = req.query.id;
-        const dealerData = req.body;
+        id = req.body.dealerId;
+        const dealerData = req.body.data;
         dealerUpdate = await dealers.updateOne(
           { _id: id },
           {
