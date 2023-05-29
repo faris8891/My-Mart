@@ -102,8 +102,8 @@ module.exports = {
       }
     },
     patch: async (req, res) => {
-      id = req.query.id;
-      dealerStatus = req.body.active;
+      id = req.body.dealerId;
+      dealerStatus = req.body.dealerStatus;
       try {
         dealerActive = await dealers.updateOne(
           { _id: id },
@@ -115,7 +115,7 @@ module.exports = {
       }
     },
     delete: async (req, res) => {
-      id = req.query.id;
+      id = req.body.dealerId;
       try {
         dealerDelete = await dealers.deleteOne({ _id: id });
         res.status(200).send("Ok");
