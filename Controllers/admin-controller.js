@@ -49,7 +49,6 @@ module.exports = {
 
   Dealer: {
     get: async (req, res) => {
-      console.log();
       try {
         const dealersData = await dealers.find({}, { password: 0 });
         res.status(200).json(dealersData);
@@ -136,6 +135,7 @@ module.exports = {
       }
     },
     post: async (req, res) => {
+      console.log(req.body);
       try {
         const data = req.body;
         const password = await bcrypt.hash(req.body.password, saltRounds);
@@ -148,6 +148,7 @@ module.exports = {
           location: data.location,
           address: data.address,
           flatNo: data.flatNo,
+          profileImage: data.profileImage,
         });
         res.status(201).send("Created");
       } catch (error) {
@@ -181,8 +182,8 @@ module.exports = {
     },
     patch: async (req, res) => {
       try {
-        const data = req.body.active;
-        const id = req.query.id;
+        const data = req.body.userStatus;
+        const id = req.body.userId;
         const user = await users.updateOne(
           { _id: id },
           { $set: { active: data } }
@@ -194,7 +195,7 @@ module.exports = {
     },
     delete: async (req, res) => {
       try {
-        const id = req.query.id;
+        const id = req.body.userId;
         const userUpdate = await users.deleteOne({
           _id: id,
         });
