@@ -157,17 +157,16 @@ module.exports = {
       }
     },
     put: async (req, res) => {
+      console.log(req.body);
       try {
-        const data = req.body;
-        const id = req.query.id;
-        const password = await bcrypt.hash(req.body.password, saltRounds);
+        const data = req.body.data;
+        const id = req.body.userId;
         const userUpdate = await users.updateOne(
           { _id: id },
           {
             $set: {
               fullName: data.fullName,
               email: data.email,
-              password: password,
               phone: data.phone,
               location: data.location,
               address: data.address,
@@ -177,6 +176,7 @@ module.exports = {
         );
         res.status(202).send("Accepted");
       } catch (error) {
+        console.log(error);
         res.status(400).send("Bad Request");
       }
     },
