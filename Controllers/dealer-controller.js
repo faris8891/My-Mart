@@ -4,10 +4,24 @@ const orders = require("../Models/orders");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 const jwt = require("jsonwebtoken");
-const { default: mongoose } = require("mongoose");
 require("dotenv").config();
 const jwt_key = process.env.JWT_KEY;
+const cloudinary = require("cloudinary").v2;
 
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET,
+  secure: true,
+});
+
+async function handleUpload(file) {
+  const res = await cloudinary.uploader.upload(file, {
+    resource_type: "auto",
+    folder: "MyMartProduct",
+  });
+  return res;
+}
 module.exports = {
   login: {
     Post: async (req, res) => {
@@ -17,19 +31,21 @@ module.exports = {
         let hash = dealer.password;
         bcrypt.compare(password, hash, function (err, result) {
           if (result == true && userName == dealer.userName) {
-            const userToken = jwt.sign({ id: dealer._id }, jwt_key);
+            const userToken = jwt.sign({ id: dealer._id }, jwt_key, {
+              expiresIn: "1d",
+            });
             res.cookie("dealerId", userToken, {
               maxAge: 900000,
               httpOnly: true,
             });
-            res.status(200).send("OK");
+            res.status(200).json(userToken);
           } else {
-            res.status(401).send("Unauthorized");
+            res.status(401).send("User name or password is incorrect");
           }
         });
       } catch (error) {
         console.log(error);
-        res.status(401).send("Unauthorized");
+        res.status(401).send("User name or password is incorrect");
       }
     },
   },
@@ -42,7 +58,6 @@ module.exports = {
           { _id: id },
           { _id: 0, products: 0, password: 0, userName: 0, orders: 0 }
         );
-        console.log(userData);
         res.status(200).json(userData);
       } catch (error) {
         res.status(404).send("Not Found");
@@ -74,35 +89,42 @@ module.exports = {
     get: async (req, res) => {
       try {
         const dealerId = req.body.id;
-        const products = await dealers.find({ _id: dealerId }, { products: 1 });
-        res.status(200).json(products);
+        const products = await dealers.find(
+          { _id: dealerId },
+          { products: 1, _id: 0 }
+        );
+        res.status(200).json(products[0]);
       } catch (error) {
         res.status(404).send("Not Found");
       }
     },
     post: async (req, res) => {
       try {
-        data = req.body;
-        const dealerId = req.body.id;
+        const data = req.body;
+        const b64 = Buffer.from(req.file.buffer).toString("base64");
+        let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+        const cldRes = await handleUpload(dataURI);
         const product = await dealers.updateOne(
           { _id: dealerId },
           {
             $push: {
-              products: ({
-                productName,
-                price,
-                category,
-                noOfItem,
-                defaultImage,
-                productImages,
-                description,
-                productActive,
-              } = data),
+              products: {
+                productName: data.productName,
+                price: data.price,
+                category: data.category,
+                noOfItem: data.noOfItem,
+                defaultImage: cldRes.secure_url,
+                productImages: data.description,
+                description: data.description,
+                productActive: data.productActive,
+              },
             },
           }
         );
+        console.log(product);
         res.status(200).send("OK");
       } catch (error) {
+        console.log(error);
         res.status(400).send("Bad Request");
       }
     },
@@ -111,7 +133,6 @@ module.exports = {
         const data = req.body;
         const dealerId = req.body.id;
         const productId = req.query.productId;
-        console.log(dealerId, productId);
         const product = await dealers.updateOne(
           { _id: dealerId, "products._id": productId },
           {
@@ -138,17 +159,21 @@ module.exports = {
       try {
         const data = req.body;
         const dealerId = req.body.id;
-        const productId = req.query.productId;
+        const productId = req.body.productId;
         const product = await dealers.updateOne(
           {
             _id: dealerId,
             "products._id": productId,
           },
-          { $set: { "products.$.productActive": data.productActive } }
+          { $set: { "products.$.productActive": data.productStatus } }
         );
-        res.status(202).send("Accepted");
+        if (product.acknowledged) {
+          res.status(202).send("Product updated successfully");
+        } else {
+          res.status(400).send("Product update failed");
+        }
       } catch (error) {
-        res.status(400).send("Bad Request");
+        res.status(400).send("Product update failed");
       }
     },
     delete: async (req, res) => {
@@ -217,6 +242,7 @@ module.exports = {
   orderHistory: {
     get: async (req, res) => {
       try {
+        console.log(req);
         const dealerId = req.body.id;
         const order = await orders.find({
           dealerId: dealerId,

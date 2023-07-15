@@ -11,6 +11,7 @@ module.exports = {
   login: {
     async post(req, res) {
       try {
+        // console.log(req.body);
         const { userName, password } = req.body;
         const adminData = await admin.findOne({ userName: userName });
         if (password == adminData.password && userName == adminData.userName) {
@@ -35,6 +36,7 @@ module.exports = {
   profile: {
     get: async (req, res) => {
       try {
+        console.log(req);
         const id = req.body.id;
         const adminData = await admin.findOne(
           { _id: id },
@@ -59,19 +61,19 @@ module.exports = {
     post: async (req, res) => {
       try {
         const dealerData = req.body;
-        console.log(req.body);
         const password = await bcrypt.hash(dealerData.password, saltRounds);
         await dealers.insertMany({
           fullName: dealerData.fullName,
           userName: dealerData.userName,
           password: password,
-          storeImage: dealerData.storeImage,
+          storeImage: "sample store image",
+          // storeImage: dealerData.storeImage,
           location: dealerData.location,
           address: dealerData.address,
-          mobile: dealerData.mobile,
-          active: dealerData.active,
+          mobile: dealerData.phone,
+          active: false,
         });
-        res.status(201).send("Created");
+        res.status(201).send("New dealer registered successfully ");
       } catch (error) {
         console.log(error);
         res.status(400).send("Bad Request");
@@ -127,7 +129,7 @@ module.exports = {
   users: {
     get: async (req, res) => {
       try {
-        const user = await users.find({}, { cart: 0, password: 0, orders: 0 });
+        const user = await users.find({}, { password: 0 });
         res.status(200).json(user);
       } catch (error) {
         console.log(error);
@@ -135,12 +137,13 @@ module.exports = {
       }
     },
     post: async (req, res) => {
-      console.log(req.body);
+      // console.log(req.body);
       try {
         const data = req.body;
+        const emailCheck = await users.find({ email: data.email });
+        const phoneCheck = await users.find({ phone: data.phone });
         const password = await bcrypt.hash(req.body.password, saltRounds);
-
-        const newUser = await users.insertMany({
+        const newUser = await users.create({
           fullName: data.fullName,
           email: data.email,
           password: password,
@@ -148,18 +151,22 @@ module.exports = {
           location: data.location,
           address: data.address,
           flatNo: data.flatNo,
-          profileImage: data.profileImage,
+          // profileImage: data.profileImage,
+          profileImage: "test image",
         });
-        res.status(201).send("Created");
+        res.status(201).send("User Created");
       } catch (error) {
-        console.log(error);
-        res.status(400).send("Bad Request");
+        if (error.keyPattern.email) {
+          res.status(400).send("Email has already been taken");
+        } else if (error.keyPattern.phone) {
+          res.status(400).send("Mobile number has already been taken");
+        } else res.status(400).send("Something wrong");
       }
     },
     put: async (req, res) => {
       console.log(req.body);
       try {
-        const data = req.body.data;
+        const data = req.body;
         const id = req.body.userId;
         const userUpdate = await users.updateOne(
           { _id: id },
@@ -174,23 +181,24 @@ module.exports = {
             },
           }
         );
-        res.status(202).send("Accepted");
+        res.status(202).send("Success fully updated user");
       } catch (error) {
         console.log(error);
-        res.status(400).send("Bad Request");
+        res.status(400).send("User update failed");
       }
     },
     patch: async (req, res) => {
       try {
-        const data = req.body.userStatus;
+        console.log(req.body);
+        const status = req.body.userStatus;
         const id = req.body.userId;
         const user = await users.updateOne(
           { _id: id },
-          { $set: { active: data } }
+          { $set: { active: status } }
         );
-        res.status(202).send("Accepted");
+        res.status(202).send("User Updated");
       } catch (error) {
-        res.status(400).send("Bad Request");
+        res.status(400).send("Updation failed");
       }
     },
     delete: async (req, res) => {
@@ -199,9 +207,10 @@ module.exports = {
         const userUpdate = await users.deleteOne({
           _id: id,
         });
-        res.status(202).send("Accepted");
+        res.status(202).send("User deleted");
+        // console.log(res);
       } catch (error) {
-        res.status(400).send("Bad Request");
+        res.status(400).send("User delete failed");
       }
     },
   },

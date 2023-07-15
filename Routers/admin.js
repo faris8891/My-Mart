@@ -10,7 +10,7 @@ const {
 const { authentication } = require("../Middleware/authentication");
 
 router.post("/login", login.post);
-router.get("/profile",authentication.admin,profile.get);
+router.get("/profile", authentication.admin, profile.get);
 router.get("/dealers", authentication.admin, Dealer.get);
 router.post("/dealers", authentication.admin, Dealer.post);
 router.put("/dealers", authentication.admin, Dealer.put);

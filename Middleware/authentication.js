@@ -5,7 +5,7 @@ const jwt_key = process.env.JWT_KEY;
 module.exports.authentication = {
   admin: async (req, res, next) => {
     try {
-      const adminId = req.headers.adminid;
+      const adminId = req.headers.authorization;
       let data = jwt.verify(adminId, jwt_key).id;
       req.body.id = data;
       next();
@@ -15,7 +15,8 @@ module.exports.authentication = {
   },
   dealers: async (req, res, next) => {
     try {
-      let dealerId = req.cookies.dealerId;
+      let dealerId = req.headers.authorization;
+      console.log(dealerId);
       let data = jwt.verify(dealerId, jwt_key).id;
       req.body.id = data;
       next();
