@@ -16,7 +16,6 @@ module.exports.authentication = {
   dealers: async (req, res, next) => {
     try {
       let dealerId = req.headers.authorization;
-      console.log(dealerId);
       let data = jwt.verify(dealerId, jwt_key).id;
       req.body.id = data;
       next();

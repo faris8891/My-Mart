@@ -5,6 +5,7 @@ const {
   profile,
   login,
   register,
+  shops,
   products,
   cart,
   feedback,
@@ -21,7 +22,9 @@ router.post("/login", login.post);
 router.post("/otp-login",otpLogin.post)
 router.put("/otp-login",otpLogin.put)
 
-router.get('/products',products.get)
+router.get('/shops', shops.get)
+
+router.get('/products/:dealerId',products.get)
 
 router.get("/profiles",authentication.users, profile.get);
 router.put("/profiles",authentication.users, profile.put);

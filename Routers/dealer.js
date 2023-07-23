@@ -5,7 +5,6 @@ const upload = require("../Middleware/Storage");
 const {
   login,
   products,
-  users,
   orders,
   feedback,
   profile,
@@ -28,7 +27,6 @@ router.put("/products", authentication.dealers, products.put);
 router.patch("/products", authentication.dealers, products.patch);
 router.delete("/products", authentication.dealers, products.delete);
 
-router.get("/users", authentication.dealers, users.get);
 
 router.get("/orders", authentication.dealers, orders.get);
 router.patch("/orders", authentication.dealers, orders.patch);

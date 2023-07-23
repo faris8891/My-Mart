@@ -64,22 +64,25 @@ module.exports = {
 
   login: {
     post: async (req, res) => {
+      console.log(req.body);
       try {
         const { email, password } = req.body;
         const user = await users.findOne({ email: email });
         let hash = user.password;
         bcrypt.compare(password, hash, function (err, result) {
           if (result == true && email == user.email) {
-            const userToken = jwt.sign({ id: user._id }, jwt_key);
+            const userToken = jwt.sign({ id: user._id }, jwt_key, {
+              expiresIn: "1d",
+            });
             res.cookie("userId", userToken, { maxAge: 900000, httpOnly: true });
-            res.status(200).send("OK");
+            res.status(200).json(userToken);
           } else {
-            res.status(401).send("Unauthorized");
+            res.status(401).send("Invalid email or password");
           }
         });
       } catch (error) {
         console.log(error);
-        res.status(400).send("Bad Request");
+        res.status(400).send("Something went wrong");
       }
     },
   },
@@ -163,16 +166,30 @@ module.exports = {
     },
   },
 
+  shops: {
+    get: async (req, res) => {
+      try {
+        // console.log(req.body);
+        const shops = await dealers.find({ active: true }, { fullName:1,location:1 });
+        res.status(200).json(shops)
+      } catch (error) {
+        console.log(error);
+      }
+    },
+  },
+
   products: {
     get: async (req, res) => {
       try {
-        const products = await dealers.find({ active: true }, { password: 0 });
+        const dealerId=req.params.dealerId
+        const products = await dealers.find({_id:dealerId, active: true }, { products:1 });
         res.status(200).json(products);
       } catch (error) {
         res.status(404).send("Not Found");
       }
     },
   },
+
   cart: {
     get: async (req, res) => {
       try {

@@ -26,6 +26,7 @@ module.exports = {
   login: {
     Post: async (req, res) => {
       try {
+        console.log(req);
         const { userName, password } = req.body;
         const dealer = await dealers.findOne({ userName: userName });
         let hash = dealer.password;
@@ -44,7 +45,6 @@ module.exports = {
           }
         });
       } catch (error) {
-        console.log(error);
         res.status(401).send("User name or password is incorrect");
       }
     },
@@ -79,7 +79,6 @@ module.exports = {
         );
         res.status(202).send("Accepted");
       } catch (error) {
-        console.log(error);
         res.status(400).send("Bad Request");
       }
     },
@@ -100,6 +99,7 @@ module.exports = {
     },
     post: async (req, res) => {
       try {
+        const dealerId = req.body.id;
         const data = req.body;
         const b64 = Buffer.from(req.file.buffer).toString("base64");
         let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
@@ -122,7 +122,7 @@ module.exports = {
           }
         );
         console.log(product);
-        res.status(200).send("OK");
+        res.status(200).send("New product added successfully");
       } catch (error) {
         console.log(error);
         res.status(400).send("Bad Request");
@@ -179,30 +179,20 @@ module.exports = {
     delete: async (req, res) => {
       try {
         const data = req.body;
-        const dealerId = req.body.id;
-        const productId = req.query.productId;
-        const product = await dealers.findOneAndUpdate(
+        console.log(req);
+        const dealerId = data.id;
+        const productId = data.productId;
+        const product = await dealers.updateOne(
           { _id: dealerId },
           { $pull: { products: { _id: productId } } }
         );
-        res.status(202).send("Accepted");
+        if (product.acknowledged == true && product.modifiedCount != 0) {
+          res.status(202).send("Product successfully removed");
+        } else {
+          res.status(400).send("Product remove failed");
+        }
       } catch (error) {
-        res.status(400).send("Bad Request");
-      }
-    },
-  },
-
-  users: {
-    get: async (req, res) => {
-      try {
-        const user = await users.find(
-          { active: true },
-          { cart: 0, password: 0, orders: 0 }
-        );
-        res.status(200).json(user);
-      } catch (error) {
-        console.log(error);
-        res.status(404).send("Not Found");
+        res.status(400).send("Something wrong ");
       }
     },
   },
@@ -224,14 +214,17 @@ module.exports = {
         res.status(404).send("Not Found");
       }
     },
+
     patch: async (req, res) => {
       try {
-        const orderId = req.query.orderId;
+        console.log(req.body);
+        const orderId = req.body.orderId;
         const status = req.body.orderStatus;
         const orderStatus = await orders.updateOne(
           { _id: orderId },
           { $set: { orderStatus: status } }
         );
+        console.log(orderStatus);
         res.status(202).send("Accepted");
       } catch (error) {
         res.status(400).send("Bad Request");
@@ -242,7 +235,6 @@ module.exports = {
   orderHistory: {
     get: async (req, res) => {
       try {
-        console.log(req);
         const dealerId = req.body.id;
         const order = await orders.find({
           dealerId: dealerId,
@@ -263,7 +255,6 @@ module.exports = {
           { dealerId: id, feedback: { $exists: true } },
           { feedback: 1 }
         );
-        console.log(feedback);
         res.status(200).json(feedback);
       } catch (error) {
         res.status(404).send("Not Found");
