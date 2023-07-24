@@ -170,8 +170,11 @@ module.exports = {
     get: async (req, res) => {
       try {
         // console.log(req.body);
-        const shops = await dealers.find({ active: true }, { fullName:1,location:1 });
-        res.status(200).json(shops)
+        const shops = await dealers.find(
+          { active: true },
+          { fullName: 1, location: 1 }
+        );
+        res.status(200).json(shops);
       } catch (error) {
         console.log(error);
       }
@@ -181,8 +184,11 @@ module.exports = {
   products: {
     get: async (req, res) => {
       try {
-        const dealerId=req.params.dealerId
-        const products = await dealers.find({_id:dealerId, active: true }, { products:1 });
+        const dealerId = req.params.dealerId;
+        const products = await dealers.find(
+          { _id: dealerId, active: true },
+          { products: 1 }
+        );
         res.status(200).json(products);
       } catch (error) {
         res.status(404).send("Not Found");
@@ -196,14 +202,13 @@ module.exports = {
         const userId = req.body.id;
         const user = await users.findOne({ _id: userId });
         let totalAmount = 0;
-        let noOfItems = 0;
         user.cart.forEach((products) => {
           totalAmount = totalAmount + products.price * products.quantity;
-          noOfItems = noOfItems + products.quantity;
         });
+
         const cart = {
           totalAmount: totalAmount,
-          noOfItems: noOfItems,
+          noOfItems: user.cart.length,
           address: user.address,
           defaultImage: user.defaultImage,
           listOfItems: user.cart,
@@ -218,8 +223,9 @@ module.exports = {
 
     post: async (req, res) => {
       try {
-        const dealer = req.query.dealerId;
-        const cartProduct = req.query.productId;
+        console.log(req.body);
+        const dealer = req.body.dealerId;
+        const cartProduct = req.body.productId;
         const userId = req.body.id;
         const product = await dealers.findOne(
           {
@@ -281,16 +287,17 @@ module.exports = {
             }
           );
         }
-        res.status(200).send("OK");
+        res.status(200).send("Successfully added to cart");
       } catch (error) {
         console.log(error);
-        res.status(400).send("Bad Request");
+        res.status(400).send("Add cart failed");
       }
     },
     delete: async (req, res) => {
       try {
         const data = req.body;
-        const productId = req.query.productId;
+        console.log(data);
+        const productId = data.productId;
         const product = await users.findOneAndUpdate(
           { _id: data.id },
           {
@@ -301,42 +308,57 @@ module.exports = {
             },
           }
         );
-        const userToken = jwt.sign({ id: data.id }, jwt_key);
-        res.cookie("userId", userToken, { maxAge: 0, httpOnly: true });
-        res.status(202).send("Accepted");
+        res.status(202).send("Successfully removed from cart");
       } catch (error) {
-        res.status(400).send("Bad Request");
+        res.status(400).send("Add product failed");
       }
     },
   },
   payment: {
     post: async (req, res) => {
       try {
+        // total amount
+        const userId = req.body.id;
+        const user = await users.findOne({ _id: userId });
+        let totalAmount = 0;
+        user.cart.forEach((products) => {
+          totalAmount = totalAmount + products.price * products.quantity;
+        });
+        // razorpay
         let instance = new razorpay({
           key_id: RZP_ID,
           key_secret: RZP_KEY,
         });
         let options = {
-          amount: req.body.totalAmount,
+          amount: `${totalAmount}00`,
           currency: "INR",
           receipt: "My-mart:" + crypto.randomBytes(7).toString("hex"),
         };
         instance.orders.create(options, function (err, order) {
-          const userToken = jwt.sign({ orderId: order.id }, jwt_key);
-          res.cookie("orderId", userToken, {
-            maxAge: 1000 * 60 * 60 * 24,
-            httpOnly: true,
+          const currentTime = Math.floor(Date.now() / 1000); // Get the current time in seconds
+          const tenMinutesLater = currentTime + 600; // 10 minutes = 600 seconds
+          const userToken = jwt.sign(
+            { orderId: order.id, exp: tenMinutesLater },
+            jwt_key
+          );
+          res.status(200).json({
+            data: order,
+            orderToken: userToken,
           });
-          console.log(order);
-          res.status(200).json({ orderId: order.id });
         });
       } catch (error) {
         console.log(error);
       }
     },
-    verify: (req, res) => {
+  },
+  paymentVerify: {
+    post: (req, res) => {
+      console.log(
+        req,
+        "***************************************************"
+      );
       try {
-        const data = req.cookies.orderId;
+        const data = req.params.orderId;
         const razorpaySignature = req.body.razorpay_signature;
         const razorpayPaymentId = req.body.razorpay_payment_id;
         const orderId = jwt.verify(data, jwt_key).orderId;
@@ -345,9 +367,9 @@ module.exports = {
           .createHmac("sha256", RZP_KEY)
           .update(orderId + "|" + razorpayPaymentId)
           .digest("hex");
-        console.log(generatedSignature, "--------", razorpaySignature);
-
-        if (generatedSignature === razorpaySignature) {
+          
+          if (generatedSignature === razorpaySignature) {
+          console.log(generatedSignature, "--------", razorpaySignature);
           res.status(200).send("OK");
         } else {
           res.status(404).send("Not Found");

@@ -26,7 +26,7 @@ module.exports.authentication = {
   },
   users: async (req, res, next) => {
     try {
-      let userId = req.cookies.userId;
+      let userId = req.headers.authorization;
       let data = jwt.verify(userId, jwt_key).id;
       req.body.id = data;
       next();

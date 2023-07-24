@@ -13,21 +13,21 @@ const {
   checkout,
   orderHistory,
   payment,
-  otpLogin
+  paymentVerify,
+  otpLogin,
 } = require("../Controllers/user-controller");
-
 
 router.post("/register", register.post);
 router.post("/login", login.post);
-router.post("/otp-login",otpLogin.post)
-router.put("/otp-login",otpLogin.put)
+router.post("/otp-login", otpLogin.post);
+router.put("/otp-login", otpLogin.put);
 
-router.get('/shops', shops.get)
+router.get("/shops", shops.get);
 
-router.get('/products/:dealerId',products.get)
+router.get("/products/:dealerId", products.get);
 
-router.get("/profiles",authentication.users, profile.get);
-router.put("/profiles",authentication.users, profile.put);
+router.get("/profiles", authentication.users, profile.get);
+router.put("/profiles", authentication.users, profile.put);
 router.delete("/profiles", authentication.users, profile.delete);
 
 router.get("/cart", authentication.users, cart.get);
@@ -35,14 +35,14 @@ router.post("/cart", authentication.users, cart.post);
 router.delete("/cart", authentication.users, cart.delete);
 
 router.post("/checkout", authentication.users, checkout.post);
-router.post("/pay",authentication.users,payment.post)
-router.post("/pay-verify",payment.verify)
+router.post("/pay", authentication.users, payment.post);
+
+router.post("/pay-verify/:orderId", paymentVerify.post);
 
 router.get("/orders-history", authentication.users, orderHistory.get);
 
 router.patch("/feedback", authentication.users, feedback.patch);
 
 router.get("/logout", authentication.users, logout.get);
-
 
 module.exports = router;
