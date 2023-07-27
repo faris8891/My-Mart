@@ -79,30 +79,37 @@ module.exports = {
         res.status(400).send("Bad Request");
       }
     },
+
     put: async (req, res) => {
       try {
-        id = req.body.dealerId;
-        const dealerData = req.body.data;
-        dealerUpdate = await dealers.updateOne(
+        const id = req.body.dealerId;
+        const dealerData = req.body;
+        const dealerUpdate = await dealers.updateOne(
           { _id: id },
           {
             $set: {
               fullName: dealerData.fullName,
               userName: dealerData.userName,
-              storeImage: dealerData.storeImage,
+              mobile: dealerData.mobile,
               location: dealerData.location,
               address: dealerData.address,
-              mobile: dealerData.mobile,
             },
           }
         );
-        res.status(202).send("Accepted");
+        console.log(dealerUpdate);
+        if (dealerUpdate.modifiedCount > 0) {
+          res.status(202).send("Dealer Updated Successfully");
+        } else {
+          res.status(202).send("Dealer Update Failed");
+        }
       } catch (error) {
         console.log(error);
-        res.status(400).send("Bad Request");
+        res.status(400).send("Something went wrong");
       }
     },
+
     patch: async (req, res) => {
+      console.log(req.body);
       id = req.body.dealerId;
       dealerStatus = req.body.dealerStatus;
       try {
@@ -110,11 +117,12 @@ module.exports = {
           { _id: id },
           { active: dealerStatus }
         );
-        res.status(200).send("Ok");
+        res.status(200).send("Dealer Updated");
       } catch (error) {
-        res.status(400).send("Bad Request");
+        res.status(400).send("Dealer Update failed");
       }
     },
+
     delete: async (req, res) => {
       id = req.body.dealerId;
       try {
@@ -136,8 +144,8 @@ module.exports = {
         res.status(404).send("Not Found");
       }
     },
+
     post: async (req, res) => {
-      // console.log(req.body);
       try {
         const data = req.body;
         const emailCheck = await users.find({ email: data.email });
@@ -163,8 +171,8 @@ module.exports = {
         } else res.status(400).send("Something wrong");
       }
     },
+
     put: async (req, res) => {
-      console.log(req.body);
       try {
         const data = req.body;
         const id = req.body.userId;
@@ -183,10 +191,10 @@ module.exports = {
         );
         res.status(202).send("Success fully updated user");
       } catch (error) {
-        console.log(error);
         res.status(400).send("User update failed");
       }
     },
+
     patch: async (req, res) => {
       try {
         console.log(req.body);
@@ -198,9 +206,10 @@ module.exports = {
         );
         res.status(202).send("User Updated");
       } catch (error) {
-        res.status(400).send("Updation failed");
+        res.status(400).send("Update failed");
       }
     },
+
     delete: async (req, res) => {
       try {
         const id = req.body.userId;

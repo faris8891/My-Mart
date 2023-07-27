@@ -37,11 +37,11 @@ router.delete("/cart", authentication.users, cart.delete);
 router.post("/checkout", authentication.users, checkout.post);
 router.post("/pay", authentication.users, payment.post);
 
-router.post("/pay-verify/:orderId", paymentVerify.post);
+router.post("/pay-verify/:orderId", authentication.users, paymentVerify.post);
 
-router.get("/orders-history", authentication.users, orderHistory.get);
+router.get("/orders", authentication.users, orderHistory.get);
 
-router.patch("/feedback", authentication.users, feedback.patch);
+router.post("/feedback", authentication.users, feedback.post);
 
 router.get("/logout", authentication.users, logout.get);
 

@@ -351,32 +351,64 @@ module.exports = {
       }
     },
   },
+
   paymentVerify: {
-    post: (req, res) => {
-      console.log(
-        req,
-        "***************************************************"
-      );
+    post: async (req, res) => {
       try {
         const data = req.params.orderId;
+        const feedback = {
+          message: "Awaiting feedback",
+          rating: 0,
+        };
         const razorpaySignature = req.body.razorpay_signature;
         const razorpayPaymentId = req.body.razorpay_payment_id;
         const orderId = jwt.verify(data, jwt_key).orderId;
-        console.log(orderId, "==========");
         const generatedSignature = crypto
           .createHmac("sha256", RZP_KEY)
           .update(orderId + "|" + razorpayPaymentId)
           .digest("hex");
-          
-          if (generatedSignature === razorpaySignature) {
-          console.log(generatedSignature, "--------", razorpaySignature);
-          res.status(200).send("OK");
+
+        if (generatedSignature === razorpaySignature) {
+          // creating order ==> online payment
+
+          const userId = req.body.id;
+          const user = await users.findOne({ _id: userId });
+
+          // const dealerId = req.query.dealerIdr; // extract from product / share from front end / add new logic for add product from only  one shop
+          let totalAmount = 0;
+          let noOfItems = 0;
+          let dealerId = user.cart[0].dealerId;
+          user.cart.forEach((products) => {
+            totalAmount = totalAmount + products.price * products.quantity;
+            noOfItems = noOfItems + products.quantity;
+          });
+
+          const order = await orders.insertMany({
+            orderId: "My-mart:" + crypto.randomBytes(7).toString("hex"),
+            userId: userId,
+            userName:user.fullName,
+            dealerId: dealerId,
+            orderDate: new Date().toLocaleString(),
+            address: user.address,
+            quantity: noOfItems,
+            totalAmount: totalAmount,
+            paymentMode: "online",
+            paymentStatus: true,
+            orderStatus: "pending",
+            items: user.cart,
+            feedback: feedback,
+          });
+          const clearCart = await users.findOneAndUpdate(
+            { _id: userId },
+            { $set: { cart: [] } }
+          );
+          res.status(200).send("Payment Successful");
         } else {
-          res.status(404).send("Not Found");
+          res.status(404).send("Payment Failed");
         }
       } catch (error) {
         console.log(error);
-        res.status(400).send("Bad Request");
+        res.status(400).send("Something went wrong!");
       }
     },
   },
@@ -385,7 +417,7 @@ module.exports = {
     post: async (req, res) => {
       try {
         const userId = req.body.id;
-        const dealerId = req.query.dealerId;
+        const dealerId = req.query.dealerIdr;
         const orderData = req.body;
 
         const user = await users.findOne({ _id: userId });
@@ -397,9 +429,6 @@ module.exports = {
         });
 
         console.log(totalAmount, noOfItems);
-
-        const cart = await users.findOne({ _id: userId }, { cart: 1 });
-        console.log(cart);
 
         const order = await orders.insertMany({
           orderId: "My-mart:" + crypto.randomBytes(7).toString("hex"),
@@ -419,6 +448,7 @@ module.exports = {
           { _id: userId },
           { $set: { cart: [] } }
         );
+
         res.status(200).send("OK");
       } catch (error) {
         console.log(error);
@@ -428,24 +458,27 @@ module.exports = {
   },
 
   feedback: {
-    patch: async (req, res) => {
+    post: async (req, res) => {
       try {
-        const orderId = req.query.orderId;
         const data = req.body;
-        console.log(data, orderId);
+        console.log(data);
+        const orderId = data.orderId;
         const feedback = await orders.updateOne(
           { userId: data.id, _id: orderId, orderStatus: "delivered" },
           {
             $set: {
-              feedback: { message: data.message, rating: data.rating },
+              feedback: { message: data.feedback, rating: data.rating },
             },
           }
         );
-        console.log(feedback);
-        res.status(202).send("Accepted");
+        if (feedback.modifiedCount > 0) {
+          res.status(202).send("Successfully updated feedback");
+        } else {
+          res.status(400).send("Feedback update failed");
+        }
       } catch (error) {
         console.log(error);
-        res.status(400).send("Bad Request");
+        res.status(400).send("Something went wrong");
       }
     },
   },

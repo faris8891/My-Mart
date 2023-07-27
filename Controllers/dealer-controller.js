@@ -97,6 +97,7 @@ module.exports = {
         res.status(404).send("Not Found");
       }
     },
+
     post: async (req, res) => {
       try {
         const dealerId = req.body.id;
@@ -128,33 +129,38 @@ module.exports = {
         res.status(400).send("Bad Request");
       }
     },
+
     put: async (req, res) => {
       try {
         const data = req.body;
-        const dealerId = req.body.id;
-        const productId = req.query.productId;
+        console.log(data);
+        const dealerId = data.id;
+        const productId = data.productId;
+        // const b64 = Buffer.from(req.file.buffer).toString("base64");
+        // let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+        // const cldRes = await handleUpload(dataURI);
+        const { productName, price, category, noOfItem, description } = data;
         const product = await dealers.updateOne(
           { _id: dealerId, "products._id": productId },
           {
-            $set: {
-              "products.$": ({
-                productName,
-                price,
-                category,
-                noOfItem,
-                defaultImage,
-                productImages,
-                description,
-                productActive,
-              } = data),
+            "$set": {
+              "products.$.productName": productName,
+              "products.$.price": price,
+              "products.$.category": category,
+              "products.$.noOfItem": noOfItem,
+              "products.$.description": description,
+              // "products.$.defaultImage": cldRes.secure_url,
             },
           }
         );
-        res.status(202).send("Accepted");
+        console.log(product, "updated products db");
+        res.status(202).send("Product updated successfully");
       } catch (error) {
+        console.log(error);
         res.status(400).send("Bad Request");
       }
     },
+
     patch: async (req, res) => {
       try {
         const data = req.body;
@@ -238,7 +244,7 @@ module.exports = {
         const dealerId = req.body.id;
         const order = await orders.find({
           dealerId: dealerId,
-          $or: [{ orderStatus: "delivered" }],
+          $or: [{ orderStatus: "delivered" },{orderStatus: "rejected" }],
         });
         res.status(200).json(order);
       } catch (error) {
