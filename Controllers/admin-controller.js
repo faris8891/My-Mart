@@ -18,7 +18,7 @@ module.exports = {
           const userToken = jwt.sign({ id: adminData._id }, jwt_key, {
             expiresIn: "1d",
           });
-          res.cookie("adminId", userToken, { httpOnly: true });
+          // res.cookie("adminId", userToken, { httpOnly: true });
           res.status(200).json(userToken);
         } else {
           res
@@ -72,6 +72,8 @@ module.exports = {
           address: dealerData.address,
           mobile: dealerData.phone,
           active: false,
+          COD: false,
+          onlinePayment:false
         });
         res.status(201).send("New dealer registered successfully ");
       } catch (error) {

@@ -22,9 +22,15 @@ module.exports = {
         const id = req.body.id;
         const userProfile = await users.findOne(
           { _id: id },
-          { password: 0, cart: 0 }
+          { profileImage: 1 }
         );
-        res.status(200).json(userProfile);
+        const cart = await users.findById({ _id: id }, { cart: 1, _id: 0 });
+        userProfile.cartLength = cart.cart.length;
+        const profile = {
+          profileImage: userProfile.profileImage,
+          cartLength: cart.cart.length,
+        };
+        res.status(200).json(profile);
       } catch (error) {
         res.status(404).send("Not Found");
       }
@@ -51,6 +57,7 @@ module.exports = {
         res.status(400).send("Bad Request");
       }
     },
+
     delete: async (req, res) => {
       try {
         const id = req.body.id;
@@ -94,51 +101,51 @@ module.exports = {
         const otp = 10000 + Math.floor(Math.random() * 89999);
         const data = await users.findOne({ phone: userPhone });
         const jwtData = { phone: data.phone, otp: otp };
-        console.log(jwtData);
 
         if (data) {
           let options = {
             authorization: FAST_SMS,
-            message: `Dear customer, use this OTP ${otp} to log in to your MyMart account. Valid for the next 5 mins.`,
+            message: `Dear user, your MyMart OTP is :${otp} Valid for 5 mins.`,
             numbers: [userPhone],
           };
 
           await fast2sms
             .sendMessage(options)
             .then((response) => {
-              const userToken = jwt.sign(jwtData, jwt_key);
-              res.cookie("otpLogin", userToken, {
-                maxAge: 1000 * 60 * 400,
-                httpOnly: true,
+              const userToken = jwt.sign(jwtData, jwt_key, {
+                expiresIn: 1000 * 60 * 400,
               });
-              res.status(200).send("OK");
+              res.status(200).json(userToken);
             })
             .catch((error) => {
               console.log(error);
               res.status(404).send("Not Found");
             });
         } else {
-          res.status(404).send("User Not Found");
+          res.status(404).send("User Not Found please register");
         }
       } catch (error) {
         console.log(error);
-        res.status(400).send("Bad Request");
+        res.status(400).send("Something went wrong");
       }
     },
+
     put: async (req, res) => {
       try {
         const otp = req.body.otp;
-        const data = req.cookies;
-        const expectedData = jwt.verify(data.otpLogin, jwt_key);
+        const data = req.body.otpToken;
+        const expectedData = jwt.verify(data, jwt_key);
         if (otp == expectedData.otp) {
           const user = await users.findOne({ mob: expectedData.mob });
-          const userToken = jwt.sign({ id: user._id }, jwt_key);
-          res.cookie("userId", userToken, { maxAge: 900000, httpOnly: true });
-          res.status(202).send("Accepted");
+          const userToken = jwt.sign({ id: user._id }, jwt_key, {
+            expiresIn: "1d",
+          });
+          res.status(202).json(userToken);
         } else {
           res.status(404).send("Not Found");
         }
       } catch (error) {
+        console.log(error);
         res.status(401).send("Unauthorized user");
       }
     },
@@ -149,19 +156,26 @@ module.exports = {
       try {
         const data = req.body;
         const password = await bcrypt.hash(data.password, saltRounds);
-        const newUser = await users.insertMany({
+        const newUser = await users.create({
           fullName: data.fullName,
           email: data.email,
           password: password,
           phone: data.phone,
-          location: data.location,
-          address: data.address,
-          flatNo: data.flatNo,
+          // location: data.location,
+          // address: data.address,
+          // flatNo: data.flatNo,
+          profileImage:
+            "https://res.cloudinary.com/dknozjmje/image/upload/v1690616727/MyMartImages/zgsq0drxkymunbbgcufq.webp",
+          active: true,
         });
-        res.status(201).send("Created");
+        res.status(201).send("You have registered successfully");
       } catch (error) {
         console.log(error);
-        res.status(400).send("Bad Request");
+        if (error.keyPattern.email) {
+          res.status(400).send("Email has already been taken");
+        } else if (error.keyPattern.phone) {
+          res.status(400).send("Mobile number has already been taken");
+        } else res.status(400).send("Something wrong");
       }
     },
   },
@@ -172,7 +186,7 @@ module.exports = {
         // console.log(req.body);
         const shops = await dealers.find(
           { active: true },
-          { fullName: 1, location: 1 }
+          { fullName: 1, location: 1,created_at:1 }
         );
         res.status(200).json(shops);
       } catch (error) {
@@ -202,6 +216,10 @@ module.exports = {
         const userId = req.body.id;
         const user = await users.findOne({ _id: userId });
         let totalAmount = 0;
+        const paymentMode = await dealers.findById(
+          { _id: user.selectedShop },
+          { COD: 1, onlinePayment: 1, _id: 0 }
+        );
         user.cart.forEach((products) => {
           totalAmount = totalAmount + products.price * products.quantity;
         });
@@ -213,6 +231,8 @@ module.exports = {
           defaultImage: user.defaultImage,
           listOfItems: user.cart,
           description: user.description,
+          dealerId: user.selectedShop,
+          paymentMode: paymentMode,
         };
         res.status(200).json(cart);
       } catch (error) {
@@ -223,71 +243,147 @@ module.exports = {
 
     post: async (req, res) => {
       try {
-        console.log(req.body);
+        const userId = req.body.id;
         const dealer = req.body.dealerId;
         const cartProduct = req.body.productId;
-        const userId = req.body.id;
-        const product = await dealers.findOne(
-          {
-            _id: dealer,
-            "products._id": cartProduct,
-          },
-          { "products.$": true }
-        );
-        const quantity = req.body.quantity;
-        const dealerId = product._id;
-        const productId = product.products[0]._id;
-        const price = product.products[0].price;
-        const defaultImage = product.products[0].defaultImage;
-        const productName = product.products[0].productName;
-        const description = product.products[0].description;
-        // console.log(dealerId, productId, price, quantity);
 
-        const existingCart = await users.find({
-          "cart.productId": cartProduct,
-        });
-        // console.log(existingCart);
+        const user = await users.findById({ _id: userId });
 
-        if (existingCart.length > 0) {
-          const quantity = await users.findOne(
-            {
-              _id: userId,
-              "cart.productId": cartProduct,
-            },
-            { "cart.quantity.$": true }
-          );
-
-          let existingQuantity = quantity.cart[0].quantity;
-          let updatedQuantity = ++existingQuantity;
-          // console.log(updatedQuantity);
-
-          const addCart = await users.updateOne(
-            {
-              _id: userId,
-              "cart.productId": cartProduct,
-            },
-            { $set: { "cart.$.quantity": updatedQuantity } }
-          );
-          // console.log(addCart, "+++++++++++");
-        } else {
-          const cart = await users.updateOne(
-            { _id: userId },
-            {
-              $push: {
-                cart: {
-                  productName: productName,
-                  dealerId: dealerId,
-                  productId: productId,
-                  price: price,
-                  defaultImage: defaultImage,
-                  quantity: quantity,
-                  description: description,
-                },
+        if (user.cart.length > 0) {
+          if (user.selectedShop != dealer) {
+            res
+              .status(400)
+              .send(
+                "You have items from different dealers in your cart. Please place separate orders for each dealer."
+              );
+          } else {
+            const product = await dealers.findOne(
+              {
+                _id: dealer,
+                "products._id": cartProduct,
               },
+              { "products.$": true }
+            );
+            const quantity = req.body.quantity;
+            const dealerId = product._id;
+            const productId = product.products[0]._id;
+            const price = product.products[0].price;
+            const defaultImage = product.products[0].defaultImage;
+            const productName = product.products[0].productName;
+            const description = product.products[0].description;
+
+            const existingCart = await users.find({
+              "cart.productId": cartProduct,
+            });
+
+            if (existingCart.length > 0) {
+              const quantity = await users.findOne(
+                {
+                  _id: userId,
+                  "cart.productId": cartProduct,
+                },
+                { "cart.quantity.$": true }
+              );
+
+              let existingQuantity = quantity.cart[0].quantity;
+              let updatedQuantity = ++existingQuantity;
+
+              const addCart = await users.updateOne(
+                {
+                  _id: userId,
+                  "cart.productId": cartProduct,
+                },
+                { $set: { "cart.$.quantity": updatedQuantity } }
+              );
+            } else {
+              const shop = await users.updateOne(
+                { _id: userId },
+                { selectedShop: dealer }
+              );
+              const cart = await users.updateOne(
+                { _id: userId },
+                {
+                  $push: {
+                    cart: {
+                      productName: productName,
+                      dealerId: dealerId,
+                      productId: productId,
+                      price: price,
+                      defaultImage: defaultImage,
+                      quantity: quantity,
+                      description: description,
+                    },
+                  },
+                }
+              );
             }
-          );
+            res.status(200).send("Successfully added to cart");
+          }
         }
-        res.status(200).send("Successfully added to cart");
+
+        if (user.cart.length == 0) {
+          const product = await dealers.findOne(
+            {
+              _id: dealer,
+              "products._id": cartProduct,
+            },
+            { "products.$": true }
+          );
+          const quantity = req.body.quantity;
+          const dealerId = product._id;
+          const productId = product.products[0]._id;
+          const price = product.products[0].price;
+          const defaultImage = product.products[0].defaultImage;
+          const productName = product.products[0].productName;
+          const description = product.products[0].description;
+
+          const existingCart = await users.find({
+            "cart.productId": cartProduct,
+          });
+
+          if (existingCart.length > 0) {
+            const quantity = await users.findOne(
+              {
+                _id: userId,
+                "cart.productId": cartProduct,
+              },
+              { "cart.quantity.$": true }
+            );
+
+            let existingQuantity = quantity.cart[0].quantity;
+            let updatedQuantity = ++existingQuantity;
+
+            const addCart = await users.updateOne(
+              {
+                _id: userId,
+                "cart.productId": cartProduct,
+              },
+              { $set: { "cart.$.quantity": updatedQuantity } }
+            );
+          } else {
+            const shop = await users.updateOne(
+              { _id: userId },
+              { selectedShop: dealer }
+            );
+            const cart = await users.updateOne(
+              { _id: userId },
+              {
+                $push: {
+                  cart: {
+                    productName: productName,
+                    dealerId: dealerId,
+                    productId: productId,
+                    price: price,
+                    defaultImage: defaultImage,
+                    quantity: quantity,
+                    description: description,
+                  },
+                },
+              }
+            );
+          }
+          res.status(200).send("Successfully added to cart");
+        }
       } catch (error) {
         console.log(error);
         res.status(400).send("Add cart failed");
@@ -296,7 +392,6 @@ module.exports = {
     delete: async (req, res) => {
       try {
         const data = req.body;
-        console.log(data);
         const productId = data.productId;
         const product = await users.findOneAndUpdate(
           { _id: data.id },
@@ -374,7 +469,6 @@ module.exports = {
           const userId = req.body.id;
           const user = await users.findOne({ _id: userId });
 
-          // const dealerId = req.query.dealerIdr; // extract from product / share from front end / add new logic for add product from only  one shop
           let totalAmount = 0;
           let noOfItems = 0;
           let dealerId = user.cart[0].dealerId;
@@ -386,7 +480,7 @@ module.exports = {
           const order = await orders.insertMany({
             orderId: "My-mart:" + crypto.randomBytes(7).toString("hex"),
             userId: userId,
-            userName:user.fullName,
+            userName: user.fullName,
             dealerId: dealerId,
             orderDate: new Date().toLocaleString(),
             address: user.address,
@@ -416,40 +510,41 @@ module.exports = {
   checkout: {
     post: async (req, res) => {
       try {
+        const feedback = {
+          message: "Awaiting feedback",
+          rating: 0,
+        };
         const userId = req.body.id;
-        const dealerId = req.query.dealerIdr;
-        const orderData = req.body;
-
         const user = await users.findOne({ _id: userId });
+
         let totalAmount = 0;
         let noOfItems = 0;
+        let dealerId = user.cart[0].dealerId;
         user.cart.forEach((products) => {
           totalAmount = totalAmount + products.price * products.quantity;
           noOfItems = noOfItems + products.quantity;
         });
 
-        console.log(totalAmount, noOfItems);
-
         const order = await orders.insertMany({
           orderId: "My-mart:" + crypto.randomBytes(7).toString("hex"),
           userId: userId,
+          userName: user.fullName,
           dealerId: dealerId,
           orderDate: new Date().toLocaleString(),
           address: user.address,
           quantity: noOfItems,
           totalAmount: totalAmount,
-          paymentMode: orderData.paymentMode,
-          paymentStatus: orderData.paymentStatus,
-          orderStatus: orderData.orderStatus,
+          paymentMode: "online",
+          paymentStatus: false,
+          orderStatus: "pending",
           items: user.cart,
+          feedback: feedback,
         });
-
         const clearCart = await users.findOneAndUpdate(
           { _id: userId },
           { $set: { cart: [] } }
         );
-
-        res.status(200).send("OK");
+        res.status(200).send("Payment Successful");
       } catch (error) {
         console.log(error);
         res.status(400).send("Bad Request");
@@ -461,7 +556,6 @@ module.exports = {
     post: async (req, res) => {
       try {
         const data = req.body;
-        console.log(data);
         const orderId = data.orderId;
         const feedback = await orders.updateOne(
           { userId: data.id, _id: orderId, orderStatus: "delivered" },

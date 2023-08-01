@@ -84,6 +84,44 @@ module.exports = {
     },
   },
 
+  COD: {
+    patch: async (req, res) => {
+      try {
+        const dealersId = req.body.id;
+        const updateCOD = await dealers.updateOne(
+          { _id: dealersId },
+          { COD: req.body.COD }
+        );
+        if (updateCOD.modifiedCount > 0) {
+          res.status(202).send("COD updated successfully");
+        } else {
+          res.status(400).send("COD update failed");
+        }
+      } catch (error) {
+        res.status(400).send("Something went wrong");
+      }
+    },
+  },
+
+  onlinePayment: {
+    patch: async (req, res) => {
+      try {
+        const dealersId = req.body.id;
+        const updateOnlinePayment = await dealers.updateOne(
+          { _id: dealersId },
+          { onlinePayment: req.body.onlinePayment }
+        );
+        if (updateOnlinePayment.modifiedCount > 0) {
+          res.status(202).send("Online payment updated successfully");
+        } else {
+          res.status(400).send("Online payment update failed");
+        }
+      } catch (error) {
+        res.status(400).send("Something went wrong");
+      }
+    },
+  },
+
   products: {
     get: async (req, res) => {
       try {
@@ -143,7 +181,7 @@ module.exports = {
         const product = await dealers.updateOne(
           { _id: dealerId, "products._id": productId },
           {
-            "$set": {
+            $set: {
               "products.$.productName": productName,
               "products.$.price": price,
               "products.$.category": category,
@@ -226,12 +264,20 @@ module.exports = {
         console.log(req.body);
         const orderId = req.body.orderId;
         const status = req.body.orderStatus;
-        const orderStatus = await orders.updateOne(
-          { _id: orderId },
-          { $set: { orderStatus: status } }
-        );
-        console.log(orderStatus);
-        res.status(202).send("Accepted");
+        if (status != "delivered") {
+          const orderStatus = await orders.updateOne(
+            { _id: orderId },
+            { $set: { orderStatus: status } }
+          );
+          res.status(202).send("Accepted");
+        }
+        if (status == "delivered") {
+          const orderStatus = await orders.updateOne(
+            { _id: orderId },
+            { $set: { orderStatus: status, paymentStatus: true } }
+          );
+          res.status(202).send("Accepted");
+        }
       } catch (error) {
         res.status(400).send("Bad Request");
       }
@@ -244,7 +290,7 @@ module.exports = {
         const dealerId = req.body.id;
         const order = await orders.find({
           dealerId: dealerId,
-          $or: [{ orderStatus: "delivered" },{orderStatus: "rejected" }],
+          $or: [{ orderStatus: "delivered" }, { orderStatus: "rejected" }],
         });
         res.status(200).json(order);
       } catch (error) {

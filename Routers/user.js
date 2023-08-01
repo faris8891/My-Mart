@@ -15,10 +15,12 @@ const {
   payment,
   paymentVerify,
   otpLogin,
+  COD,
 } = require("../Controllers/user-controller");
 
 router.post("/register", register.post);
 router.post("/login", login.post);
+
 router.post("/otp-login", otpLogin.post);
 router.put("/otp-login", otpLogin.put);
 
