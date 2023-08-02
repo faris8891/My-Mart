@@ -186,7 +186,7 @@ module.exports = {
         // console.log(req.body);
         const shops = await dealers.find(
           { active: true },
-          { fullName: 1, location: 1,created_at:1 }
+          { fullName: 1, location: 1, created_at: 1, isTopShops: 1, isOpen: 1 }
         );
         res.status(200).json(shops);
       } catch (error) {

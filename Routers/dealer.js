@@ -11,6 +11,7 @@ const {
   orderHistory,
   COD,
   onlinePayment,
+  shopClose,
 } = require("../Controllers/dealer-controller");
 
 router.post("/login", login.Post);
@@ -20,6 +21,8 @@ router.put("/profile", authentication.dealers, profile.put);
 
 router.patch("/cod", authentication.dealers, COD.patch);
 router.patch("/online-payment", authentication.dealers, onlinePayment.patch);
+
+router.patch("/close-shop", authentication.dealers, shopClose.patch);
 
 router.get("/products", authentication.dealers, products.get);
 router.post(

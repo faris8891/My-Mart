@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const dealerSchema = new mongoose.Schema(
   {
-    fullName: {
+    fullName: { //TODO:1 change to not required
       type: String,
       required: true,
     },
@@ -37,6 +37,8 @@ const dealerSchema = new mongoose.Schema(
     },
     COD: { type: Boolean },
     onlinePayment: { type: Boolean },
+    isTopShops: { type: Boolean },
+    isOpen: { type: Boolean },
 
     products: [
       {

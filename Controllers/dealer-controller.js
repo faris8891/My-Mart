@@ -56,7 +56,7 @@ module.exports = {
         const id = req.body.id;
         const userData = await dealers.findOne(
           { _id: id },
-          { _id: 0, products: 0, password: 0, userName: 0, orders: 0 }
+          { products: 0, password: 0, userName: 0, orders: 0 }
         );
         res.status(200).json(userData);
       } catch (error) {
@@ -116,6 +116,23 @@ module.exports = {
         } else {
           res.status(400).send("Online payment update failed");
         }
+      } catch (error) {
+        res.status(400).send("Something went wrong");
+      }
+    },
+  },
+
+  shopClose: {
+    patch: async (req, res) => {
+      try {
+        const data = req.body;
+        console.log(data);
+        const closeDealers = await dealers.updateOne(
+          { _id: data.dealerId },
+          { isOpen: data.data }
+        );
+        console.log(closeDealers);
+        res.status(202).send("success");
       } catch (error) {
         res.status(400).send("Something went wrong");
       }

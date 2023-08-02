@@ -11,14 +11,12 @@ module.exports = {
   login: {
     async post(req, res) {
       try {
-        // console.log(req.body);
         const { userName, password } = req.body;
         const adminData = await admin.findOne({ userName: userName });
         if (password == adminData.password && userName == adminData.userName) {
           const userToken = jwt.sign({ id: adminData._id }, jwt_key, {
             expiresIn: "1d",
           });
-          // res.cookie("adminId", userToken, { httpOnly: true });
           res.status(200).json(userToken);
         } else {
           res
@@ -36,7 +34,6 @@ module.exports = {
   profile: {
     get: async (req, res) => {
       try {
-        console.log(req);
         const id = req.body.id;
         const adminData = await admin.findOne(
           { _id: id },
@@ -73,7 +70,9 @@ module.exports = {
           mobile: dealerData.phone,
           active: false,
           COD: false,
-          onlinePayment:false
+          onlinePayment: false,
+          isTopShops: false,
+          isOpen:false
         });
         res.status(201).send("New dealer registered successfully ");
       } catch (error) {
@@ -98,7 +97,6 @@ module.exports = {
             },
           }
         );
-        console.log(dealerUpdate);
         if (dealerUpdate.modifiedCount > 0) {
           res.status(202).send("Dealer Updated Successfully");
         } else {
@@ -111,7 +109,6 @@ module.exports = {
     },
 
     patch: async (req, res) => {
-      console.log(req.body);
       id = req.body.dealerId;
       dealerStatus = req.body.dealerStatus;
       try {
@@ -126,12 +123,32 @@ module.exports = {
     },
 
     delete: async (req, res) => {
-      id = req.body.dealerId;
       try {
+        id = req.body.dealerId;
         dealerDelete = await dealers.deleteOne({ _id: id });
         res.status(200).send("Ok");
       } catch (error) {
         res.status(400).send("Bad Request");
+      }
+    },
+  },
+
+  topShops: {
+    patch: async (req, res) => {
+      try {
+        const data = req.body;
+        const topShops = await dealers.updateOne(
+          { _id: data.dealerId },
+          { isTopShops: data.isTopShops }
+        );
+        if (data.isTopShops) {
+          res.status(200).send("Added to top shops");
+        } else {
+          res.status(200).send("Removed from top shops");
+        }
+      } catch (error) {
+        console.log(error);
+        res.status(400).send("Something went wrong");
       }
     },
   },
@@ -199,7 +216,6 @@ module.exports = {
 
     patch: async (req, res) => {
       try {
-        console.log(req.body);
         const status = req.body.userStatus;
         const id = req.body.userId;
         const user = await users.updateOne(

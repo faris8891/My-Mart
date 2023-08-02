@@ -6,6 +6,7 @@ const {
   logout,
   users,
   profile,
+  topShops,
 } = require("../Controllers/admin-controller");
 const { authentication } = require("../Middleware/authentication");
 
@@ -16,6 +17,8 @@ router.post("/dealers", authentication.admin, Dealer.post);
 router.put("/dealers", authentication.admin, Dealer.put);
 router.patch("/dealers", authentication.admin, Dealer.patch);
 router.delete("/dealers", authentication.admin, Dealer.delete);
+
+router.patch("/top-shops", authentication.admin, topShops.patch);
 
 router.get("/users", authentication.admin, users.get);
 router.post("/users", authentication.admin, users.post);
