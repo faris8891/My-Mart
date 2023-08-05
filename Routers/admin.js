@@ -7,6 +7,7 @@ const {
   users,
   profile,
   topShops,
+  apiTest,
 } = require("../Controllers/admin-controller");
 const { authentication } = require("../Middleware/authentication");
 
@@ -27,5 +28,6 @@ router.patch("/users", authentication.admin, users.patch);
 router.delete("/users", authentication.admin, users.delete);
 
 router.get("/logout", authentication.admin, logout.get);
+router.get("/api-test", apiTest.test);
 
 module.exports = router;

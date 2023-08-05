@@ -8,6 +8,23 @@ const jwt_key = process.env.JWT_KEY;
 const saltRounds = 10;
 
 module.exports = {
+  apiTest: {
+    test: (req, res) => {
+      try {
+        res.status(200).json({
+          message: "api connected",
+          data: { sampleData: "this is a test data" },
+          status: "success",
+        });
+      } catch (error) {
+        res.status(400).json({
+          message: "api connection failed",
+          status: "something went wrong",
+        });
+      }
+    },
+  },
+
   login: {
     async post(req, res) {
       try {
@@ -72,7 +89,7 @@ module.exports = {
           COD: false,
           onlinePayment: false,
           isTopShops: false,
-          isOpen:false
+          isOpen: false,
         });
         res.status(201).send("New dealer registered successfully ");
       } catch (error) {
