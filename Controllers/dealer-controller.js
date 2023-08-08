@@ -5,7 +5,7 @@ const bcrypt = require("bcrypt");
 const saltRounds = 10;
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
-const jwt_key = process.env.JWT_KEY;
+const jwt_key = process.env.JWT_DEALER_KEY;
 const cloudinary = require("cloudinary").v2;
 
 cloudinary.config({

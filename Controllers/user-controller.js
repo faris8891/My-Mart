@@ -13,7 +13,7 @@ require("dotenv").config();
 const FAST_SMS = process.env.FAST_SMS;
 const RZP_ID = process.env.RZP_ID;
 const RZP_KEY = process.env.RZP_KEY;
-const jwt_key = process.env.JWT_KEY;
+const jwt_key = process.env.JWT_USER_KEY;
 
 module.exports = {
   profile: {
