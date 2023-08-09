@@ -4,7 +4,7 @@ const dealers = require("../Models/dealer");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
-const jwt_key = process.env.JWT_JWT_ADMIN_KEY;
+const jwt_key = process.env.JWT_ADMIN_KEY;
 const saltRounds = 10;
 
 module.exports = {
