@@ -41,7 +41,6 @@ module.exports = {
             .send("You have entered an invalid username or password");
         }
       } catch (error) {
-        console.log(error);
         res
           .status(401)
           .send("You have entered an invalid username or password");
@@ -93,7 +92,6 @@ module.exports = {
         });
         res.status(201).send("New dealer registered successfully ");
       } catch (error) {
-        console.log(error);
         res.status(400).send("Bad Request");
       }
     },
@@ -120,7 +118,6 @@ module.exports = {
           res.status(202).send("Dealer Update Failed");
         }
       } catch (error) {
-        console.log(error);
         res.status(400).send("Something went wrong");
       }
     },
@@ -164,7 +161,6 @@ module.exports = {
           res.status(200).send("Removed from top shops");
         }
       } catch (error) {
-        console.log(error);
         res.status(400).send("Something went wrong");
       }
     },
@@ -176,7 +172,6 @@ module.exports = {
         const user = await users.find({}, { password: 0 });
         res.status(200).json(user);
       } catch (error) {
-        console.log(error);
         res.status(404).send("Not Found");
       }
     },
@@ -252,7 +247,6 @@ module.exports = {
           _id: id,
         });
         res.status(202).send("User deleted");
-        // console.log(res);
       } catch (error) {
         res.status(400).send("User delete failed");
       }

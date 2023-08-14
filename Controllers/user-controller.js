@@ -53,7 +53,6 @@ module.exports = {
         );
         res.status(202).send("Accepted");
       } catch (error) {
-        console.log(error);
         res.status(400).send("Bad Request");
       }
     },
@@ -71,7 +70,6 @@ module.exports = {
 
   login: {
     post: async (req, res) => {
-      // console.log(req.body);
       try {
         const { email, password } = req.body;
         const user = await users.findOne({ email: email });
@@ -88,7 +86,6 @@ module.exports = {
           }
         });
       } catch (error) {
-        console.log(error);
         res.status(400).send("Something went wrong");
       }
     },
@@ -118,14 +115,12 @@ module.exports = {
               res.status(200).json(userToken);
             })
             .catch((error) => {
-              console.log(error);
               res.status(404).send("Not Found");
             });
         } else {
           res.status(404).send("User Not Found please register");
         }
       } catch (error) {
-        console.log(error);
         res.status(400).send("Something went wrong");
       }
     },
@@ -145,7 +140,6 @@ module.exports = {
           res.status(404).send("Not Found");
         }
       } catch (error) {
-        console.log(error);
         res.status(401).send("Unauthorized user");
       }
     },
@@ -170,7 +164,6 @@ module.exports = {
         });
         res.status(201).send("You have registered successfully");
       } catch (error) {
-        console.log(error);
         if (error.keyPattern.email) {
           res.status(400).send("Email has already been taken");
         } else if (error.keyPattern.phone) {
@@ -183,14 +176,12 @@ module.exports = {
   shops: {
     get: async (req, res) => {
       try {
-        // console.log(req.body);
         const shops = await dealers.find(
           { active: true },
           { fullName: 1, location: 1, created_at: 1, isTopShops: 1, isOpen: 1 }
         );
         res.status(200).json(shops);
       } catch (error) {
-        console.log(error);
       }
     },
   },
@@ -236,7 +227,6 @@ module.exports = {
         };
         res.status(200).json(cart);
       } catch (error) {
-        console.log(error);
         res.status(404).send("Not Found");
       }
     },
@@ -385,7 +375,6 @@ module.exports = {
           res.status(200).send("Successfully added to cart");
         }
       } catch (error) {
-        console.log(error);
         res.status(400).send("Add cart failed");
       }
     },
@@ -442,7 +431,6 @@ module.exports = {
           });
         });
       } catch (error) {
-        console.log(error);
       }
     },
   },
@@ -501,7 +489,6 @@ module.exports = {
           res.status(404).send("Payment Failed");
         }
       } catch (error) {
-        console.log(error);
         res.status(400).send("Something went wrong!");
       }
     },
@@ -546,7 +533,6 @@ module.exports = {
         );
         res.status(200).send("Payment Successful");
       } catch (error) {
-        console.log(error);
         res.status(400).send("Bad Request");
       }
     },
@@ -571,7 +557,6 @@ module.exports = {
           res.status(400).send("Feedback update failed");
         }
       } catch (error) {
-        console.log(error);
         res.status(400).send("Something went wrong");
       }
     },

@@ -26,7 +26,6 @@ module.exports = {
   login: {
     Post: async (req, res) => {
       try {
-        console.log(req);
         const { userName, password } = req.body;
         const dealer = await dealers.findOne({ userName: userName });
         let hash = dealer.password;
@@ -126,12 +125,10 @@ module.exports = {
     patch: async (req, res) => {
       try {
         const data = req.body;
-        console.log(data);
         const closeDealers = await dealers.updateOne(
           { _id: data.dealerId },
           { isOpen: data.data }
         );
-        console.log(closeDealers);
         res.status(202).send("success");
       } catch (error) {
         res.status(400).send("Something went wrong");
@@ -177,10 +174,8 @@ module.exports = {
             },
           }
         );
-        console.log(product);
         res.status(200).send("New product added successfully");
       } catch (error) {
-        console.log(error);
         res.status(400).send("Bad Request");
       }
     },
@@ -188,7 +183,6 @@ module.exports = {
     put: async (req, res) => {
       try {
         const data = req.body;
-        console.log(data);
         const dealerId = data.id;
         const productId = data.productId;
         // const b64 = Buffer.from(req.file.buffer).toString("base64");
@@ -208,10 +202,8 @@ module.exports = {
             },
           }
         );
-        console.log(product, "updated products db");
         res.status(202).send("Product updated successfully");
       } catch (error) {
-        console.log(error);
         res.status(400).send("Bad Request");
       }
     },
@@ -240,7 +232,6 @@ module.exports = {
     delete: async (req, res) => {
       try {
         const data = req.body;
-        console.log(req);
         const dealerId = data.id;
         const productId = data.productId;
         const product = await dealers.updateOne(
@@ -278,7 +269,6 @@ module.exports = {
 
     patch: async (req, res) => {
       try {
-        console.log(req.body);
         const orderId = req.body.orderId;
         const status = req.body.orderStatus;
         if (status != "delivered") {
@@ -341,7 +331,6 @@ module.exports = {
         );
         res.status(202).send("Accepted");
       } catch (error) {
-        console.log(error);
         res.status(400).send("Bad Request");
       }
     },
