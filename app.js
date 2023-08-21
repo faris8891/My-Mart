@@ -2,6 +2,7 @@ const bodyParser = require("body-parser");
 const express = require("express");
 const app = express();
 const cors = require("cors");
+const logger = require("./Util/winstonLogger")
 
 const cookie = require("cookie-parser");
 app.use(cookie());
@@ -17,7 +18,7 @@ const key = process.env.SECRET_KEY;
 
 // -----------------Database Connection---------------------
 const mongoose = require("mongoose");
-mongoose.connect(key).then(() => console.log("Mongo Db connected"));
+mongoose.connect(key).then(() => {logger.info("Mongo DB Connected")}).catch((error) => logger.error("Failed to connect DB", error.message))
 
 // -----------------Routers---------------------
 const userRouter = require("./Routers/user");
@@ -32,5 +33,5 @@ app.use("/admin", adminRouter);
 
 // -----------------Express server connect---------------------
 app.listen(port, () => {
-  console.log(`Express Server Connected at ${port}`);
+  logger.info(`Express Server Connected at ${port}`);
 });

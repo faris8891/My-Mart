@@ -10,24 +10,16 @@ const saltRounds = 10;
 module.exports = {
   apiTest: {
     test: (req, res) => {
-      try {
         res.status(200).json({
           message: "api connected",
           data: { sampleData: "this is a test data" },
           status: "success",
         });
-      } catch (error) {
-        res.status(400).json({
-          message: "api connection failed",
-          status: "something went wrong",
-        });
-      }
     },
   },
 
   login: {
     async post(req, res) {
-      try {
         const { userName, password } = req.body;
         const adminData = await admin.findOne({ userName: userName });
         if (password == adminData.password && userName == adminData.userName) {
@@ -40,39 +32,25 @@ module.exports = {
             .status(401)
             .send("You have entered an invalid username or password");
         }
-      } catch (error) {
-        res
-          .status(401)
-          .send("You have entered an invalid username or password");
-      }
     },
   },
   profile: {
     get: async (req, res) => {
-      try {
         const id = req.body.id;
         const adminData = await admin.findOne(
           { _id: id },
           { password: 0, _id: 0 }
         );
         res.status(200).json(adminData);
-      } catch (error) {
-        res.status(404).send("Not Found");
-      }
     },
   },
 
   Dealer: {
     get: async (req, res) => {
-      try {
         const dealersData = await dealers.find({}, { password: 0 });
         res.status(200).json(dealersData);
-      } catch (error) {
-        res.status(404).send("Not Found");
-      }
     },
     post: async (req, res) => {
-      try {
         const dealerData = req.body;
         const password = await bcrypt.hash(dealerData.password, saltRounds);
         await dealers.insertMany({
@@ -91,13 +69,9 @@ module.exports = {
           isOpen: false,
         });
         res.status(201).send("New dealer registered successfully ");
-      } catch (error) {
-        res.status(400).send("Bad Request");
-      }
     },
 
     put: async (req, res) => {
-      try {
         const id = req.body.dealerId;
         const dealerData = req.body;
         const dealerUpdate = await dealers.updateOne(
@@ -117,39 +91,27 @@ module.exports = {
         } else {
           res.status(202).send("Dealer Update Failed");
         }
-      } catch (error) {
-        res.status(400).send("Something went wrong");
-      }
     },
 
     patch: async (req, res) => {
       id = req.body.dealerId;
       dealerStatus = req.body.dealerStatus;
-      try {
         dealerActive = await dealers.updateOne(
           { _id: id },
           { active: dealerStatus }
         );
         res.status(200).send("Dealer Updated");
-      } catch (error) {
-        res.status(400).send("Dealer Update failed");
-      }
     },
 
     delete: async (req, res) => {
-      try {
         id = req.body.dealerId;
         dealerDelete = await dealers.deleteOne({ _id: id });
         res.status(200).send("Ok");
-      } catch (error) {
-        res.status(400).send("Bad Request");
-      }
     },
   },
 
   topShops: {
     patch: async (req, res) => {
-      try {
         const data = req.body;
         const topShops = await dealers.updateOne(
           { _id: data.dealerId },
@@ -160,24 +122,16 @@ module.exports = {
         } else {
           res.status(200).send("Removed from top shops");
         }
-      } catch (error) {
-        res.status(400).send("Something went wrong");
-      }
     },
   },
 
   users: {
     get: async (req, res) => {
-      try {
         const user = await users.find({}, { password: 0 });
         res.status(200).json(user);
-      } catch (error) {
-        res.status(404).send("Not Found");
-      }
     },
 
     post: async (req, res) => {
-      try {
         const data = req.body;
         const emailCheck = await users.find({ email: data.email });
         const phoneCheck = await users.find({ phone: data.phone });
@@ -194,17 +148,9 @@ module.exports = {
           profileImage: "test image",
         });
         res.status(201).send("User Created");
-      } catch (error) {
-        if (error.keyPattern.email) {
-          res.status(400).send("Email has already been taken");
-        } else if (error.keyPattern.phone) {
-          res.status(400).send("Mobile number has already been taken");
-        } else res.status(400).send("Something wrong");
-      }
     },
 
     put: async (req, res) => {
-      try {
         const data = req.body;
         const id = req.body.userId;
         const userUpdate = await users.updateOne(
@@ -221,13 +167,9 @@ module.exports = {
           }
         );
         res.status(202).send("Success fully updated user");
-      } catch (error) {
-        res.status(400).send("User update failed");
-      }
     },
 
     patch: async (req, res) => {
-      try {
         const status = req.body.userStatus;
         const id = req.body.userId;
         const user = await users.updateOne(
@@ -235,21 +177,14 @@ module.exports = {
           { $set: { active: status } }
         );
         res.status(202).send("User Updated");
-      } catch (error) {
-        res.status(400).send("Update failed");
-      }
     },
 
     delete: async (req, res) => {
-      try {
         const id = req.body.userId;
         const userUpdate = await users.deleteOne({
           _id: id,
         });
         res.status(202).send("User deleted");
-      } catch (error) {
-        res.status(400).send("User delete failed");
-      }
     },
   },
 
