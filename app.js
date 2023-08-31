@@ -2,12 +2,15 @@ const bodyParser = require("body-parser");
 const express = require("express");
 const app = express();
 const cors = require("cors");
+
 const logger = require("./Util/winstonLogger")
+const morganMiddleware = require("./Util/morganMiddleware");
 
 const cookie = require("cookie-parser");
 app.use(cookie());
 app.use(bodyParser.json());
 app.use(cors())
+app.use(morganMiddleware)
 
 
 // -----------------ENV---------------------
@@ -30,6 +33,11 @@ app.use("/dealers", dealerRouter);
 const adminRouter = require("./Routers/admin");
 const cookieParser = require("cookie-parser");
 app.use("/admin", adminRouter);
+
+const { ErrorHandler } = require("./Util/errorHandling");
+app.use(ErrorHandler)
+
+
 
 // -----------------Express server connect---------------------
 app.listen(port, () => {
