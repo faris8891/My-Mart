@@ -23,9 +23,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       // required: true,
     },
-    address: {
+    address: [
+      {
+        type: String,
+        // required: true,
+      },
+    ],
+    pinCode: {
       type: String,
-      // required: true,
     },
     flatNo: {
       type: String,
@@ -35,49 +40,48 @@ const userSchema = new mongoose.Schema(
       type: String,
       // required: true,
     },
-    active: {
+    isVerifiedEmail: {
+      type: Boolean,
+      default: false,
+      required: true,
+    },
+    isVerifiedMobile: {
+      type: Boolean,
+      default: false,
+      required: true,
+    },
+    isActive: {
       type: Boolean,
       default: true,
     },
+    //need able to shop from deferent shops...
     selectedShop: {
       type: String,
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+      required: true,
+    },
     cart: [
       {
-        productName: {
-          type: String,
-          required: true,
-        },
-        defaultImage: {
-          type: String,
-          required: true,
-        },
         dealerId: {
-          type: String,
+          type: mongoose.Types.ObjectId,
           required: true,
+          // ref:"add dealers collection"
         },
         productId: {
-          type: String,
+          type: mongoose.Types.ObjectId,
           required: true,
-        },
-        price: {
-          type: Number,
-          required: true,
-        },
-        quantity: {
-          type: Number,
-          required: true,
-        },
-        description: {
-          type: String,
+          // ref:"create new collection for products"
         },
       },
     ],
   },
   {
     timestamps: {
-      createdAt: "created_at",
-      updatedAt: "updated_at",
+      createdAt: "createdDate",
+      updatedAt: "updatedDate",
     },
   }
 );
