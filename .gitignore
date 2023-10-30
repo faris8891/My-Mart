@@ -4,3 +4,6 @@ status code.js
 Inputs
 review.md
 payment.html
+.env.dev
+.env.prod
+.env.old
