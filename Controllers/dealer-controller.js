@@ -23,6 +23,48 @@ async function handleUpload(file) {
   return res;
 }
 module.exports = {
+  dealersRegister: async (req, res) => {
+    try {
+      console.log(req.body);
+      const { fullName, shopName, email, password, phone, location, address } =
+        req.body;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+      const newDealer = await dealers.create({
+        fullName: fullName,
+        shopName: shopName,
+        email: email,
+        password: hashedPassword,
+        phone: phone,
+        location: location,
+        address: address,
+      });
+      res.status(201).json({
+        status: "success",
+        message: "You have registered successfully",
+        data: {
+          createdDealer: newDealer,
+        },
+      });
+    } catch (error) {
+      if (error.keyPattern.email) {
+        res.status(400).json({
+          status: "Failed",
+          message: "Email has already been taken",
+        });
+      } else if (error.keyPattern.phone) {
+        res.status(400).json({
+          status: "Failed",
+          message: "Mobile number has already been taken",
+        });
+      } else
+        res.status(400).json({
+          status: "Failed",
+          message: "Something wrong",
+        });
+    }
+  },
+
+  //XXX Pending ================================================>>
   login: {
     Post: async (req, res) => {
       try {

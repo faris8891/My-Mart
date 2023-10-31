@@ -3,6 +3,7 @@ const router = express.Router();
 const { authentication } = require("../Middleware/authentication");
 const upload = require("../Middleware/Storage");
 const {
+  dealersRegister,
   login,
   products,
   orders,
@@ -15,6 +16,8 @@ const {
 } = require("../Controllers/dealer-controller");
 
 router.post("/login", login.Post);
+
+router.post("/register", dealersRegister);
 
 router.get("/profile", authentication.dealers, profile.get);
 router.put("/profile", authentication.dealers, profile.put);
