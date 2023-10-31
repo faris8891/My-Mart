@@ -61,7 +61,7 @@ module.exports = {
     post: async (req, res) => {
       try {
         const { email, password } = req.body;
-        const user = await users.findOne({ email: email, isActive: true });
+        const user = await users.findOne({ email: email, isActive: true, isDeleted:false });
         let hash = user.password;
         bcrypt.compare(password, hash, function (err, result) {
           if (result === true && email === user.email) {

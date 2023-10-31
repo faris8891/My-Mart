@@ -42,10 +42,12 @@ const userSchema = new mongoose.Schema(
     },
     isVerifiedEmail: {
       type: Boolean,
+      required:true,
       default: false,
     },
-    isVerifiedMobile: {
+    isVerifiedPhone: {
       type: Boolean,
+      required:true,
       default: false,
     },
     isActive: {
@@ -58,6 +60,7 @@ const userSchema = new mongoose.Schema(
     },
     isDeleted: {
       type: Boolean,
+      required:true,
       default: false,
     },
     cart: [
