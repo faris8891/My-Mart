@@ -5,6 +5,7 @@ module.exports = {
         try {
             return await controller(req, res)
         } catch (error) {
+            logger.error(error)
             return next(error)
         }
     }

@@ -4,7 +4,7 @@ const { authentication } = require("../Middleware/authentication");
 const {
   profile,
   login,
-  register,
+  registerUsers,
   shops,
   products,
   cart,
@@ -17,8 +17,9 @@ const {
   otpLogin,
   COD,
 } = require("../Controllers/user-controller");
+const tryCatch = require("../Middleware/tryCatch");
 
-router.post("/register", register.post);
+router.post("/register", registerUsers.post);
 router.post("/login", login.post);
 
 router.post("/otp-login", otpLogin.post);

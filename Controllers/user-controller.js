@@ -145,16 +145,16 @@ module.exports = {
     },
   },
 
-  register: {
+  registerUsers: {
     post: async (req, res) => {
       try {
-        const data = req.body;
-        const password = await bcrypt.hash(data.password, saltRounds);
+        const { fullName, email, password, phone } = req.body;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
         const newUser = await users.create({
-          fullName: data.fullName,
-          email: data.email,
-          password: password,
-          phone: data.phone,
+          fullName: fullName,
+          email: email,
+          password: hashedPassword,
+          phone: phone,
           // location: data.location,
           // address: data.address,
           // flatNo: data.flatNo,
@@ -162,13 +162,29 @@ module.exports = {
             "https://res.cloudinary.com/dknozjmje/image/upload/v1690616727/MyMartImages/zgsq0drxkymunbbgcufq.webp",
           active: true,
         });
-        res.status(201).send("You have registered successfully");
+        res.status(201).json({
+          status: "success",
+          message: "You have registered successfully",
+          data: {
+            createdUser: newUser,
+          },
+        });
       } catch (error) {
         if (error.keyPattern.email) {
-          res.status(400).send("Email has already been taken");
+          res.status(400).json({
+            status: "Failed",
+            message: "Email has already been taken",
+          });
         } else if (error.keyPattern.phone) {
-          res.status(400).send("Mobile number has already been taken");
-        } else res.status(400).send("Something wrong");
+          res.status(400).json({
+            status: "Failed",
+            message: "Mobile number has already been taken",
+          });
+        } else
+          res.status(400).json({
+            status: "Failed",
+            message: "Something wrong",
+          });
       }
     },
   },
@@ -181,8 +197,7 @@ module.exports = {
           { fullName: 1, location: 1, created_at: 1, isTopShops: 1, isOpen: 1 }
         );
         res.status(200).json(shops);
-      } catch (error) {
-      }
+      } catch (error) {}
     },
   },
 
@@ -430,8 +445,7 @@ module.exports = {
             orderToken: userToken,
           });
         });
-      } catch (error) {
-      }
+      } catch (error) {}
     },
   },
 
