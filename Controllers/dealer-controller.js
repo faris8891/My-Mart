@@ -64,32 +64,42 @@ module.exports = {
     }
   },
 
-  //XXX Pending ================================================>>
-  login: {
-    Post: async (req, res) => {
-      try {
-        const { userName, password } = req.body;
-        const dealer = await dealers.findOne({ userName: userName });
-        let hash = dealer.password;
-        bcrypt.compare(password, hash, function (err, result) {
-          if (result == true && userName == dealer.userName) {
-            const userToken = jwt.sign({ id: dealer._id }, jwt_key, {
-              expiresIn: "1d",
-            });
-            res.cookie("dealerId", userToken, {
-              maxAge: 900000,
-              httpOnly: true,
-            });
-            res.status(200).json(userToken);
-          } else {
-            res.status(401).send("User name or password is incorrect");
-          }
-        });
-      } catch (error) {
-        res.status(401).send("User name or password is incorrect");
-      }
-    },
+  dealersLogin: async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      const dealer = await dealers.findOne({
+        email: email,
+        isActive: true,
+        isDeleted: false,
+      });
+      bcrypt.compare(password, dealer.password, function (err, result) {
+        if (result === true && email === dealer.email) {
+          const dealerToken = jwt.sign({ id: dealer._id }, jwt_key, {
+            expiresIn: "1d",
+          });
+          res.status(200).json({
+            status: "success",
+            message: "You have logged successfully",
+            data: {
+              token: dealerToken,
+            },
+          });
+        } else {
+          res.status(401).json({
+            status: "Failed",
+            message: "Invalid email or password",
+          });
+        }
+      });
+    } catch (error) {
+      res.status(401).json({
+        status: "Failed",
+        message: "User not found",
+      });
+    }
   },
+
+  //XXX Pending ================================================>>
 
   profile: {
     get: async (req, res) => {

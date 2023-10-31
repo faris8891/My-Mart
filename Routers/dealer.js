@@ -4,7 +4,7 @@ const { authentication } = require("../Middleware/authentication");
 const upload = require("../Middleware/Storage");
 const {
   dealersRegister,
-  login,
+  dealersLogin,
   products,
   orders,
   feedback,
@@ -15,7 +15,7 @@ const {
   shopClose,
 } = require("../Controllers/dealer-controller");
 
-router.post("/login", login.Post);
+router.post("/login", dealersLogin);
 
 router.post("/register", dealersRegister);
 

@@ -70,7 +70,7 @@ module.exports = {
             });
             res.status(200).json({
               status: "success",
-              message: "You have Logged successfully",
+              message: "You have logged successfully",
               data: {
                 token: userToken,
               },
@@ -85,7 +85,7 @@ module.exports = {
       } catch (error) {
         res.status(400).json({
           status: "Failed",
-          message: "Something went wrong",
+          message: "User not found",
         });
       }
     },
