@@ -16,6 +16,82 @@ const RZP_KEY = process.env.RZP_KEY;
 const jwt_key = process.env.JWT_USER_KEY;
 
 module.exports = {
+  registerUsers: {
+    post: async (req, res) => {
+      try {
+        const { fullName, email, password, phone } = req.body;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        const newUser = await users.create({
+          fullName: fullName,
+          email: email,
+          password: hashedPassword,
+          phone: phone,
+          profileImage:
+            "https://res.cloudinary.com/dknozjmje/image/upload/v1690616727/MyMartImages/zgsq0drxkymunbbgcufq.webp",
+          active: true,
+        });
+        res.status(201).json({
+          status: "success",
+          message: "You have registered successfully",
+          data: {
+            createdUser: newUser,
+          },
+        });
+      } catch (error) {
+        if (error.keyPattern.email) {
+          res.status(400).json({
+            status: "Failed",
+            message: "Email has already been taken",
+          });
+        } else if (error.keyPattern.phone) {
+          res.status(400).json({
+            status: "Failed",
+            message: "Mobile number has already been taken",
+          });
+        } else
+          res.status(400).json({
+            status: "Failed",
+            message: "Something wrong",
+          });
+      }
+    },
+  },
+
+  login: {
+    post: async (req, res) => {
+      try {
+        const { email, password } = req.body;
+        const user = await users.findOne({ email: email, isActive: true });
+        let hash = user.password;
+        bcrypt.compare(password, hash, function (err, result) {
+          if (result === true && email === user.email) {
+            const userToken = jwt.sign({ id: user._id }, jwt_key, {
+              expiresIn: "1d",
+            });
+            res.status(200).json({
+              status: "success",
+              message: "You have Logged successfully",
+              data: {
+                token: userToken,
+              },
+            });
+          } else {
+            res.status(401).json({
+              status: "Failed",
+              message: "Invalid email or password",
+            });
+          }
+        });
+      } catch (error) {
+        res.status(400).json({
+          status: "Failed",
+          message: "Something went wrong",
+        });
+      }
+    },
+  },
+
+  // XXX pending  ==========================================================================>>
   profile: {
     get: async (req, res) => {
       try {
@@ -64,29 +140,6 @@ module.exports = {
         res.status(202).send("Accepted");
       } catch (error) {
         res.status(400).send("Bad Request");
-      }
-    },
-  },
-
-  login: {
-    post: async (req, res) => {
-      try {
-        const { email, password } = req.body;
-        const user = await users.findOne({ email: email });
-        let hash = user.password;
-        bcrypt.compare(password, hash, function (err, result) {
-          if (result == true && email == user.email) {
-            const userToken = jwt.sign({ id: user._id }, jwt_key, {
-              expiresIn: "1d",
-            });
-            res.cookie("userId", userToken, { maxAge: 900000, httpOnly: true });
-            res.status(200).json(userToken);
-          } else {
-            res.status(401).send("Invalid email or password");
-          }
-        });
-      } catch (error) {
-        res.status(400).send("Something went wrong");
       }
     },
   },
@@ -142,52 +195,6 @@ module.exports = {
       } catch (error) {
         res.status(401).send("Unauthorized user");
       }
-    },
-  },
-
-  registerUsers: {
-    post: async (req, res) => {
-      try {
-        const { fullName, email, password, phone } = req.body;
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
-        const newUser = await users.create({
-          fullName: fullName,
-          email: email,
-          password: hashedPassword,
-          phone: phone,
-          // location: data.location,
-          // address: data.address,
-          // flatNo: data.flatNo,
-          profileImage:
-            "https://res.cloudinary.com/dknozjmje/image/upload/v1690616727/MyMartImages/zgsq0drxkymunbbgcufq.webp",
-          active: true,
-        });
-        res.status(201).json({
-          status: "success",
-          message: "You have registered successfully",
-          data: {
-            createdUser: newUser,
-          },
-        });
-      } catch (error) {
-        if (error.keyPattern.email) {
-          res.status(400).json({
-            status: "Failed",
-            message: "Email has already been taken",
-          });
-        } else if (error.keyPattern.phone) {
-          res.status(400).json({
-            status: "Failed",
-            message: "Mobile number has already been taken",
-          });
-        } else
-          res.status(400).json({
-            status: "Failed",
-            message: "Something wrong",
-          });
-      }
-
-      
     },
   },
 
