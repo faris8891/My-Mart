@@ -28,7 +28,7 @@ const userRouter = require("./Routers/user");
 app.use("/api/users", userRouter);
 
 const dealerRouter = require("./Routers/dealer");
-app.use("/dealers", dealerRouter);
+app.use("/api/dealers", dealerRouter);
 
 const adminRouter = require("./Routers/admin");
 const cookieParser = require("cookie-parser");
