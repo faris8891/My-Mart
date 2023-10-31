@@ -25,7 +25,7 @@ mongoose.connect(key).then(() => {logger.info("Mongo DB Connected")}).catch((err
 
 // -----------------Routers---------------------
 const userRouter = require("./Routers/user");
-app.use("/", userRouter);
+app.use("/api/users", userRouter);
 
 const dealerRouter = require("./Routers/dealer");
 app.use("/dealers", dealerRouter);
