@@ -99,6 +99,119 @@ module.exports = {
     }
   },
 
+  products: {
+    // get: async (req, res) => {
+    //   try {
+    //     const dealerId = req.body.id;
+    //     const products = await dealers.find(
+    //       { _id: dealerId },
+    //       { products: 1, _id: 0 }
+    //     );
+    //     res.status(200).json(products[0]);
+    //   } catch (error) {
+    //     res.status(404).send("Not Found");
+    //   }
+    // },
+
+    post: async (req, res) => {
+      try {
+        const dealerId = req.body.id;
+        const data = req.body;
+        const b64 = Buffer.from(req.file.buffer).toString("base64");
+        let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+        const cldRes = await handleUpload(dataURI);
+        const product = await dealers.updateOne(
+          { _id: dealerId },
+          {
+            $push: {
+              products: {
+                productName: data.productName,
+                price: data.price,
+                category: data.category,
+                noOfItem: data.noOfItem,
+                defaultImage: cldRes.secure_url,
+                productImages: data.description,
+                description: data.description,
+                productActive: data.productActive,
+              },
+            },
+          }
+        );
+        res.status(200).send("New product added successfully");
+      } catch (error) {
+        res.status(400).send("Bad Request");
+      }
+    },
+
+    // put: async (req, res) => {
+    //   try {
+    //     const data = req.body;
+    //     const dealerId = data.id;
+    //     const productId = data.productId;
+    //     // const b64 = Buffer.from(req.file.buffer).toString("base64");
+    //     // let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+    //     // const cldRes = await handleUpload(dataURI);
+    //     const { productName, price, category, noOfItem, description } = data;
+    //     const product = await dealers.updateOne(
+    //       { _id: dealerId, "products._id": productId },
+    //       {
+    //         $set: {
+    //           "products.$.productName": productName,
+    //           "products.$.price": price,
+    //           "products.$.category": category,
+    //           "products.$.noOfItem": noOfItem,
+    //           "products.$.description": description,
+    //           // "products.$.defaultImage": cldRes.secure_url,
+    //         },
+    //       }
+    //     );
+    //     res.status(202).send("Product updated successfully");
+    //   } catch (error) {
+    //     res.status(400).send("Bad Request");
+    //   }
+    // },
+
+    // patch: async (req, res) => {
+    //   try {
+    //     const data = req.body;
+    //     const dealerId = req.body.id;
+    //     const productId = req.body.productId;
+    //     const product = await dealers.updateOne(
+    //       {
+    //         _id: dealerId,
+    //         "products._id": productId,
+    //       },
+    //       { $set: { "products.$.productActive": data.productStatus } }
+    //     );
+    //     if (product.acknowledged) {
+    //       res.status(202).send("Product updated successfully");
+    //     } else {
+    //       res.status(400).send("Product update failed");
+    //     }
+    //   } catch (error) {
+    //     res.status(400).send("Product update failed");
+    //   }
+    // },
+    // delete: async (req, res) => {
+    //   try {
+    //     const data = req.body;
+    //     const dealerId = data.id;
+    //     const productId = data.productId;
+    //     const product = await dealers.updateOne(
+    //       { _id: dealerId },
+    //       { $pull: { products: { _id: productId } } }
+    //     );
+    //     if (product.acknowledged == true && product.modifiedCount != 0) {
+    //       res.status(202).send("Product successfully removed");
+    //     } else {
+    //       res.status(400).send("Product remove failed");
+    //     }
+    //   } catch (error) {
+    //     res.status(400).send("Something wrong ");
+    //   }
+    // },
+  },
+
   //XXX Pending ================================================>>
 
   profile: {
@@ -188,118 +301,6 @@ module.exports = {
     },
   },
 
-  products: {
-    get: async (req, res) => {
-      try {
-        const dealerId = req.body.id;
-        const products = await dealers.find(
-          { _id: dealerId },
-          { products: 1, _id: 0 }
-        );
-        res.status(200).json(products[0]);
-      } catch (error) {
-        res.status(404).send("Not Found");
-      }
-    },
-
-    post: async (req, res) => {
-      try {
-        const dealerId = req.body.id;
-        const data = req.body;
-        const b64 = Buffer.from(req.file.buffer).toString("base64");
-        let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
-        const cldRes = await handleUpload(dataURI);
-        const product = await dealers.updateOne(
-          { _id: dealerId },
-          {
-            $push: {
-              products: {
-                productName: data.productName,
-                price: data.price,
-                category: data.category,
-                noOfItem: data.noOfItem,
-                defaultImage: cldRes.secure_url,
-                productImages: data.description,
-                description: data.description,
-                productActive: data.productActive,
-              },
-            },
-          }
-        );
-        res.status(200).send("New product added successfully");
-      } catch (error) {
-        res.status(400).send("Bad Request");
-      }
-    },
-
-    put: async (req, res) => {
-      try {
-        const data = req.body;
-        const dealerId = data.id;
-        const productId = data.productId;
-        // const b64 = Buffer.from(req.file.buffer).toString("base64");
-        // let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
-        // const cldRes = await handleUpload(dataURI);
-        const { productName, price, category, noOfItem, description } = data;
-        const product = await dealers.updateOne(
-          { _id: dealerId, "products._id": productId },
-          {
-            $set: {
-              "products.$.productName": productName,
-              "products.$.price": price,
-              "products.$.category": category,
-              "products.$.noOfItem": noOfItem,
-              "products.$.description": description,
-              // "products.$.defaultImage": cldRes.secure_url,
-            },
-          }
-        );
-        res.status(202).send("Product updated successfully");
-      } catch (error) {
-        res.status(400).send("Bad Request");
-      }
-    },
-
-    patch: async (req, res) => {
-      try {
-        const data = req.body;
-        const dealerId = req.body.id;
-        const productId = req.body.productId;
-        const product = await dealers.updateOne(
-          {
-            _id: dealerId,
-            "products._id": productId,
-          },
-          { $set: { "products.$.productActive": data.productStatus } }
-        );
-        if (product.acknowledged) {
-          res.status(202).send("Product updated successfully");
-        } else {
-          res.status(400).send("Product update failed");
-        }
-      } catch (error) {
-        res.status(400).send("Product update failed");
-      }
-    },
-    delete: async (req, res) => {
-      try {
-        const data = req.body;
-        const dealerId = data.id;
-        const productId = data.productId;
-        const product = await dealers.updateOne(
-          { _id: dealerId },
-          { $pull: { products: { _id: productId } } }
-        );
-        if (product.acknowledged == true && product.modifiedCount != 0) {
-          res.status(202).send("Product successfully removed");
-        } else {
-          res.status(400).send("Product remove failed");
-        }
-      } catch (error) {
-        res.status(400).send("Something wrong ");
-      }
-    },
-  },
 
   orders: {
     get: async (req, res) => {
