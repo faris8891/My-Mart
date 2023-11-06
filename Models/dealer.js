@@ -93,7 +93,7 @@ const dealerSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("dealer", dealerSchema);
+module.exports = mongoose.model("dealers", dealerSchema);
 
 // products: [
 //   {
