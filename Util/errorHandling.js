@@ -1,14 +1,15 @@
 const AppError = require("./AppError");
 const logger = require("./winstonLogger");
 
+
+
 module.exports = {
     ErrorHandler: (error, req, res, next) => {
-
         if (error instanceof AppError) {
-            logger.error(error.message)
-            return res.status(error.StatusCode).json({
+            logger.error(error)
+            return res.status(error.statusCode).json({
                 status: "failure",
-                message: error.ErrorCode,
+                message: error.errorCode,
                 error_message: error.message
             })
         }

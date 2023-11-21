@@ -28,12 +28,12 @@ router.patch("/online-payment", authentication.dealers, onlinePayment.patch);
 router.patch("/close-shop", authentication.dealers, shopClose.patch);
 
 router.get("/products", authentication.dealers, products.get);
-router.post(
-  "/products",
-  upload.single("file"),
-  authentication.dealers,
-  products.post
-);
+// router.post(
+//   "/products",
+//   upload.single("file"),
+//   authentication.dealers,
+//   products.post
+// );
 router.put("/products", authentication.dealers, products.put);
 router.patch("/products", authentication.dealers, products.patch);
 router.delete("/products", authentication.dealers, products.delete);

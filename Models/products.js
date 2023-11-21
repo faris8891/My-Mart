@@ -4,6 +4,7 @@ const productSchema = new mongoose.Schema(
     dealer: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "dealers",
+      required: true,
     },
     productName: {
       type: String,
@@ -15,7 +16,6 @@ const productSchema = new mongoose.Schema(
     },
     brand: {
       type: String,
-      required: true,
     },
     category: {
       type: mongoose.Schema.Types.ObjectId,
@@ -27,17 +27,16 @@ const productSchema = new mongoose.Schema(
     stock: {
       type: Number,
       required: true,
+      default: 0,
     },
     productAvailability: {
       type: Date,
     },
     defaultImage: {
       type: String,
-      required: true,
     },
     productImages: {
       type: Array,
-      required: true,
     },
     description: {
       type: String,
@@ -45,6 +44,7 @@ const productSchema = new mongoose.Schema(
     isActive: {
       type: Boolean,
       required: true,
+      default: false,
     },
     rating: {
       type: Number,
@@ -74,6 +74,6 @@ const productSchema = new mongoose.Schema(
   }
 );
 
-const productsModal = mongoose.Model("product", productSchema);
+const productsModal = mongoose.model("product", productSchema);
 
 module.exports = productsModal;
