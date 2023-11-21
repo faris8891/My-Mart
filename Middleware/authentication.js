@@ -17,12 +17,16 @@ module.exports.authentication = {
   },
   dealers: async (req, res, next) => {
     try {
-      let dealerId = req.headers.authorization;
-      let data = jwt.verify(dealerId, JWT_DEALER_KEY).id;
+      let dealerId = req.headers.authorization.split(" ")[1];
+      let data = jwt.verify(dealerId, JWT_DEALER_KEY).id
       req.body.id = data;
       next();
     } catch (error) {
-      res.status(401).send("Unauthorized user");
+      res.status(401).json({
+        status: "Failed",
+        message: "Unauthorized user",
+      });
+
     }
   },
   users: async (req, res, next) => {
