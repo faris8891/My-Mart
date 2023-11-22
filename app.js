@@ -26,7 +26,6 @@ const mongoose = require("mongoose");
 mongoose.connect(key).then(() => {logger.info("Mongo DB Connected")}).catch((error) => logger.error("Failed to connect DB", error.message))
 
 // -----------------Routers---------------------
-const { authentication } = require("./Middleware/authentication");
 
 
 const userRouter = require("./Routers/user");
@@ -39,7 +38,7 @@ const adminRouter = require("./Routers/admin");
 app.use("/admin", adminRouter);
 
 const productsRouter = require("./Routers/products")
-app.use("/api", authentication.dealers, productsRouter)
+app.use("/api", productsRouter)
 
 
 const { ErrorHandler } = require("./Util/errorHandling");
