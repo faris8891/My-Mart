@@ -95,39 +95,3 @@ const dealerSchema = new mongoose.Schema(
 
 module.exports = mongoose.model("dealers", dealerSchema);
 
-// products: [
-//   {
-//     productName: { type: String, required: true },
-//     price: {
-//       type: Number,
-//       required: true,
-//     },
-//     category: { type: String, required: true },
-//     noOfItem: { type: Number, required: true },
-//     defaultImage: { type: String, required: true },
-//     productImages: { type: Array, required: true },
-//     description: { type: String, required: true },
-//     productActive: { type: Boolean, required: true },
-//   },
-// ],
-
-// orders: [
-//   {
-//     name: { type: String, required: true },
-//     email: { type: String, required: true },
-//     address: { type: String, required: true },
-//     mobile: { type: Number, required: true },
-//     driver: { type: String, required: true },
-//     orderStatus: { default: "pending", type: String, required: true },
-//     date: { type: Date, required: true },
-//     product: [
-//       {
-//         productId: { type: String },
-//         price: { type: Number },
-//         totalPrice: { type: Number },
-//         quantity: { type: Number },
-//         dealerId: { type: String },
-//       },
-//     ],
-//   },
-// ],

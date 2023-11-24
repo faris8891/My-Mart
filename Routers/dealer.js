@@ -5,43 +5,39 @@ const upload = require("../Middleware/Storage");
 const {
   dealersRegister,
   dealersLogin,
-  products,
-  orders,
-  feedback,
-  profile,
-  orderHistory,
-  COD,
-  onlinePayment,
-  shopClose,
 } = require("../Controllers/dealer-controller");
+const { tryCatch } = require("../Middleware/tryCatch");
 
-router.post("/login", dealersLogin);
+router.route("/login").post(tryCatch(dealersLogin));
 
-router.post("/register", dealersRegister);
+router.route("/register").post(tryCatch(dealersRegister));
 
-router.get("/profile", authentication.dealers, profile.get);
-router.put("/profile", authentication.dealers, profile.put);
+// =========================OLD========================>>
 
-router.patch("/cod", authentication.dealers, COD.patch);
-router.patch("/online-payment", authentication.dealers, onlinePayment.patch);
+// router.get("/profile", authentication.dealers, profile.get);
+// router.put("/profile", authentication.dealers, profile.put);
 
-router.patch("/close-shop", authentication.dealers, shopClose.patch);
+// router.patch("/cod", authentication.dealers, COD.patch);
+// router.patch("/online-payment", authentication.dealers, onlinePayment.patch);
 
-router.get("/products", authentication.dealers, products.get);
+// router.patch("/close-shop", authentication.dealers, shopClose.patch);
+
+// router.get("/products", authentication.dealers, products.get);
 // router.post(
 //   "/products",
 //   upload.single("file"),
 //   authentication.dealers,
 //   products.post
 // );
-router.put("/products", authentication.dealers, products.put);
-router.patch("/products", authentication.dealers, products.patch);
-router.delete("/products", authentication.dealers, products.delete);
+// router.put("/products", authentication.dealers, products.put);
+// router.patch("/products", authentication.dealers, products.patch);
+// router.delete("/products", authentication.dealers, products.delete);
 
-router.get("/orders", authentication.dealers, orders.get);
-router.patch("/orders", authentication.dealers, orders.patch);
-router.get("/orders-history", authentication.dealers, orderHistory.get);
+// router.get("/orders", authentication.dealers, orders.get);
+// router.patch("/orders", authentication.dealers, orders.patch);
+// router.get("/orders-history", authentication.dealers, orderHistory.get);
 
-router.get("/feedback", authentication.dealers, feedback.get);
-router.delete("/feedback", authentication.dealers, feedback.delete);
+// router.get("/feedback", authentication.dealers, feedback.get);
+// router.delete("/feedback", authentication.dealers, feedback.delete);
+
 module.exports = router;

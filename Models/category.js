@@ -4,11 +4,24 @@ const categorySchema = new mongoose.Schema(
     name: {
       type: String,
     },
-    createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "users",
-      required: true,
+    color: {
+      type: String,
     },
+
+    // tag: {
+    //   type:mongoose.Schema.Types.ObjectId
+    // },
+    // createdBy: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "users",
+    //   required: true,
+    // },
+    // updatedBy: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "users",
+    //   required: true,
+    // },
+
     isDeleted: {
       type: String,
       default: false,
@@ -22,6 +35,6 @@ const categorySchema = new mongoose.Schema(
   }
 );
 
-const productsModal = mongoose.model("product", productSchema);
+const categoryModel = mongoose.model("category", categorySchema);
 
-module.exports = productsModal;
+module.exports = categoryModel;
