@@ -8,6 +8,8 @@ const jwt_key = process.env.JWT_ADMIN_KEY;
 const saltRounds = 10;
 
 module.exports = {
+
+  // ============================================================OLD====================================================================>>
   apiTest: {
     test: (req, res) => {
         res.status(200).json({

@@ -6,7 +6,7 @@ const productSchema = new mongoose.Schema(
       ref: "dealers",
       required: true,
     },
-    productName: {
+    name: {
       type: String,
       required: true,
     },
@@ -26,7 +26,6 @@ const productSchema = new mongoose.Schema(
     },
     stock: {
       type: Number,
-      required: true,
       default: 0,
     },
     productAvailability: {
@@ -74,6 +73,6 @@ const productSchema = new mongoose.Schema(
   }
 );
 
-const productsModal = mongoose.model("product", productSchema);
+const productsModel = mongoose.model("product", productSchema);
 
-module.exports = productsModal;
+module.exports = productsModel;
