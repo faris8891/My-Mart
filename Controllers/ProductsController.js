@@ -48,9 +48,20 @@ const productController = {
     });
     res.status(201).json({
       status: "success",
-      message: "Product added successfully",
+      message: "New category successfully",
       data: {
         addedCategory: newCategory,
+      },
+    });
+  },
+
+  getCategory: async (req, res) => {
+    const categories = await categoryModel.find({ isDeleted: false });
+    res.status(200).json({
+      status: "success",
+      message: "Successfully fetched categories",
+      data: {
+        categories: categories,
       },
     });
   },
