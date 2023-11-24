@@ -38,7 +38,7 @@ const adminRouter = require("./Routers/admin");
 app.use("/admin", adminRouter);
 
 const productsRouter = require("./Routers/products")
-app.use("/api", productsRouter)
+app.use("/api/products", productsRouter)
 
 
 const { ErrorHandler } = require("./Util/errorHandling");

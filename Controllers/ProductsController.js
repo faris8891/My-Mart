@@ -3,7 +3,6 @@ const categoryModel = require("../Models/category");
 
 const productController = {
   addProducts: async (req, res) => {
-    console.log(dealerId, "add products");
     const dealerId = req.body?.id;
     const {
       name,
@@ -26,7 +25,7 @@ const productController = {
       defaultImage: defaultImage,
       productImages: productImages,
       description: description,
-      tag: tag,
+      // tag: tag,
     });
 
     res.status(201).json({
@@ -34,6 +33,17 @@ const productController = {
       message: "Product added successfully",
       data: {
         addedProduct: newProduct,
+      },
+    });
+  },
+
+  getProducts: async (req, res) => {
+    const products = await productsModel.find({ isDeleted: false })
+    res.status(200).json({
+      status: "success",
+      message: "Successfully fetched categories",
+      data: {
+        products: products,
       },
     });
   },
