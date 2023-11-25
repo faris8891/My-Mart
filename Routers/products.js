@@ -6,12 +6,14 @@ const {
   getProducts,
   createCategory,
   getCategory,
+  activateProducts
 } = require("../Controllers/ProductsController");
 const { tryCatch } = require("../Middleware/tryCatch");
 
 router.route("/")
   .get(authentication.dealers, tryCatch(getProducts))
-  .post(authentication.dealers, tryCatch(addProducts));
+  .post(authentication.dealers, tryCatch(addProducts))
+  .patch(authentication.dealers, tryCatch(activateProducts))
 
 router
   .route("/category").get(authentication.dealers, tryCatch(getCategory))
