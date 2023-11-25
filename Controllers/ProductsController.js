@@ -38,12 +38,27 @@ const productController = {
   },
 
   getProducts: async (req, res) => {
-    const products = await productsModel.find({ isDeleted: false })
+    const products = await productsModel.find({ isDeleted: false });
     res.status(200).json({
       status: "success",
       message: "Successfully fetched categories",
       data: {
         products: products,
+      },
+    });
+  },
+
+  activateProducts: async (req, res) => {
+    console.log(req, res);
+    const { productId, status } = req.params;
+    const activatedProduct = await productsModel.findByIdAndUpdate(productId, {
+      isActive: status,
+    });
+    res.status(200).json({
+      status: "success",
+      message: "Successfully changed product status",
+      data: {
+        product: activatedProduct,
       },
     });
   },
