@@ -48,12 +48,36 @@ const productController = {
     });
   },
 
-  activateProducts: async (req, res) => {
-    console.log(req, res);
-    const { productId, status } = req.params;
-    const activatedProduct = await productsModel.findByIdAndUpdate(productId, {
-      isActive: status,
+  getProduct: async (req, res) => {
+    const { id } = req.params;
+    const filter = { _id: id, isDeleted: false };
+
+    const product = await productsModel.findOne(filter);
+
+    res.status(200).json({
+      status: " success",
+      message: "Successfully fetched product",
+      data: {
+        product: product,
+      },
     });
+  },
+
+  activateProduct: async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.query;
+
+    const filter = { _id: id, isDeleted: false };
+    const update = { isActive: status };
+
+    const activatedProduct = await productsModel.findOneAndUpdate(
+      filter,
+      update,
+      {
+        new: true,
+      }
+    );
+
     res.status(200).json({
       status: "success",
       message: "Successfully changed product status",
@@ -80,7 +104,7 @@ const productController = {
     });
   },
 
-  getCategory: async (req, res) => {
+  getCategories: async (req, res) => {
     const categories = await categoryModel.find({ isDeleted: false });
     res.status(200).json({
       status: "success",
