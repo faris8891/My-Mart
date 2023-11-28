@@ -1,22 +1,28 @@
 const express = require("express");
 const router = express.Router();
 const { authentication } = require("../Middleware/authentication");
+const { tryCatch } = require("../Middleware/tryCatch");
 const {
   addProducts,
   getProducts,
   createCategory,
-  getCategory,
-  activateProducts
+  getCategories,
+  getProduct,
+  activateProduct,
 } = require("../Controllers/ProductsController");
-const { tryCatch } = require("../Middleware/tryCatch");
-
-router.route("/")
-  .get(authentication.dealers, tryCatch(getProducts))
-  .post(authentication.dealers, tryCatch(addProducts))
-  .patch(authentication.dealers, tryCatch(activateProducts))
 
 router
-  .route("/category").get(authentication.dealers, tryCatch(getCategory))
+  .route("/")
+  .get(tryCatch(getProducts))
+  .post(authentication.dealers, tryCatch(addProducts));
+
+router.route("/:id")
+  .get(tryCatch(getProduct))
+  .patch(authentication.dealers, tryCatch(activateProduct));
+
+router
+  .route("/category")
+  .get(authentication.dealers, tryCatch(getCategories))
   .post(authentication.dealers, tryCatch(createCategory)); // TODO change auth to admin
 
 module.exports = router;
