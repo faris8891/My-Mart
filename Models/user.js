@@ -10,57 +10,58 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    isVerifiedEmail: {
+      type: Boolean,
+      default: false,
+    },
     password: {
       type: String,
       required: true,
     },
     phone: {
-      type: Number,
+      type: String,
       required: true,
       unique: true,
     },
-    location: {
-      type: String,
-      // required: true,
+    isVerifiedPhone: {
+      type: Boolean,
+      default: false,
     },
     address: [
       {
-        type: String,
-        // required: true,
+        state: {
+          type: String,
+        },
+        district: {
+          type: String,
+        },
+        city: {
+          type: String,
+        },
+        street: {
+          type: String,
+        },
+        landmark: {
+          type: String,
+        },
+        pinCode: {
+          type: String,
+        },
+        flatNo: {
+          type: String,
+        },
       },
     ],
-    pinCode: {
-      type: String,
-    },
-    flatNo: {
-      type: String,
-      // required: true,
-    },
+
     profileImage: {
       type: String,
-      // required: true,
-    },
-    isVerifiedEmail: {
-      type: Boolean,
-      required:true,
-      default: false,
-    },
-    isVerifiedPhone: {
-      type: Boolean,
-      required:true,
-      default: false,
     },
     isActive: {
       type: Boolean,
       default: true,
     },
-    //need able to shop from deferent shops...
-    selectedShop: {
-      type: String,
-    },
     isDeleted: {
       type: Boolean,
-      required:true,
       default: false,
     },
     cart: [
