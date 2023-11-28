@@ -1,11 +1,8 @@
 class AppError extends Error {
-    constructor(ErrorCode, Message, StatusCode) {
-        super(Message);
-        this.ErrorCode = ErrorCode
-        this.StatusCode = StatusCode
-    }
+  constructor(ErrorCode, Message, StatusCode) {
+    super(Message);
+    this.ErrorCode = ErrorCode;
+    this.StatusCode = StatusCode;
+  }
 }
-
-
-
-module.exports = AppError
+module.exports = AppError;

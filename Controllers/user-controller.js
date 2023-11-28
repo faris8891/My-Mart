@@ -7,6 +7,8 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const razorpay = require("razorpay");
 const fast2sms = require("fast-two-sms");
+const AppError = require("../Util/AppError");
+const { ErrorHandler } = require("../Util/errorHandling");
 
 require("dotenv").config();
 
@@ -15,83 +17,59 @@ const RZP_ID = process.env.RZP_ID;
 const RZP_KEY = process.env.RZP_KEY;
 const jwt_key = process.env.JWT_USER_KEY;
 
-module.exports = {
-  registerUsers: {
-    post: async (req, res) => {
-      try {
-        const { fullName, email, password, phone } = req.body;
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
-        const newUser = await users.create({
-          fullName: fullName,
-          email: email,
-          password: hashedPassword,
-          phone: phone,
-          profileImage:
-            "https://res.cloudinary.com/dknozjmje/image/upload/v1690616727/MyMartImages/zgsq0drxkymunbbgcufq.webp",
-          active: true,
-        });
-        res.status(201).json({
+const userController = {
+  registerUsers: async (req, res) => {
+    const { fullName, email, password, phone } = req.body;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const newUser = await users.create({
+      fullName: fullName,
+      email: email,
+      password: hashedPassword,
+      phone: phone,
+    });
+    newUser.save();
+    res.status(201).json({
+      status: "success",
+      message: "You have registered successfully",
+      data: {
+        createdUser: newUser,
+      },
+    });
+  },
+
+  loginUsers: async (req, res) => {
+    const { email, password } = req.body;
+    const filter = {
+      email: email,
+      isActive: true,
+      isDeleted: false,
+    };
+    const user = await users.findOne(filter);
+    let hash = user.password;
+
+    bcrypt.compare(password, hash, function (err, result) {
+      if (result === true && email === user.email) {
+        const userToken = jwt.sign({ id: user._id }, jwt_key);
+        res.status(200).json({
           status: "success",
-          message: "You have registered successfully",
+          message: "You have logged successfully",
           data: {
-            createdUser: newUser,
+            token: userToken,
+            user: user,
           },
         });
-      } catch (error) {
-        if (error.keyPattern.email) {
-          res.status(400).json({
-            status: "Failed",
-            message: "Email has already been taken",
-          });
-        } else if (error.keyPattern.phone) {
-          res.status(400).json({
-            status: "Failed",
-            message: "Mobile number has already been taken",
-          });
-        } else
-          res.status(400).json({
-            status: "Failed",
-            message: "Something wrong",
-          });
+      } else {
+        const appError = new AppError(
+          "Login failed",
+          "Invalid email or password",
+          401
+        );
+        ErrorHandler(appError, req, res);
       }
-    },
+    });
   },
 
-  login: {
-    post: async (req, res) => {
-      try {
-        const { email, password } = req.body;
-        const user = await users.findOne({ email: email, isActive: true, isDeleted:false });
-        let hash = user.password;
-        bcrypt.compare(password, hash, function (err, result) {
-          if (result === true && email === user.email) {
-            const userToken = jwt.sign({ id: user._id }, jwt_key, {
-              expiresIn: "1d",
-            });
-            res.status(200).json({
-              status: "success",
-              message: "You have logged successfully",
-              data: {
-                token: userToken,
-              },
-            });
-          } else {
-            res.status(401).json({
-              status: "Failed",
-              message: "Invalid email or password",
-            });
-          }
-        });
-      } catch (error) {
-        res.status(400).json({
-          status: "Failed",
-          message: "User not found",
-        });
-      }
-    },
-  },
-
-  // XXX pending  ==========================================================================>>
+  // ========================================== OLD =======================================>>
   profile: {
     get: async (req, res) => {
       try {
@@ -198,230 +176,6 @@ module.exports = {
     },
   },
 
-  shops: {
-    get: async (req, res) => {
-      try {
-        const shops = await dealers.find(
-          { active: true },
-          { fullName: 1, location: 1, created_at: 1, isTopShops: 1, isOpen: 1 }
-        );
-        res.status(200).json(shops);
-      } catch (error) {}
-    },
-  },
-
-  products: {
-    get: async (req, res) => {
-      try {
-        const dealerId = req.params.dealerId;
-        const products = await dealers.find(
-          { _id: dealerId, active: true },
-          { products: 1 }
-        );
-        res.status(200).json(products);
-      } catch (error) {
-        res.status(404).send("Not Found");
-      }
-    },
-  },
-
-  cart: {
-    get: async (req, res) => {
-      try {
-        const userId = req.body.id;
-        const user = await users.findOne({ _id: userId });
-        let totalAmount = 0;
-        const paymentMode = await dealers.findById(
-          { _id: user.selectedShop },
-          { COD: 1, onlinePayment: 1, _id: 0 }
-        );
-        user.cart.forEach((products) => {
-          totalAmount = totalAmount + products.price * products.quantity;
-        });
-
-        const cart = {
-          totalAmount: totalAmount,
-          noOfItems: user.cart.length,
-          address: user.address,
-          defaultImage: user.defaultImage,
-          listOfItems: user.cart,
-          description: user.description,
-          dealerId: user.selectedShop,
-          paymentMode: paymentMode,
-        };
-        res.status(200).json(cart);
-      } catch (error) {
-        res.status(404).send("Not Found");
-      }
-    },
-
-    post: async (req, res) => {
-      try {
-        const userId = req.body.id;
-        const dealer = req.body.dealerId;
-        const cartProduct = req.body.productId;
-
-        const user = await users.findById({ _id: userId });
-
-        if (user.cart.length > 0) {
-          if (user.selectedShop != dealer) {
-            res
-              .status(400)
-              .send(
-                "You have items from different dealers in your cart. Please place separate orders for each dealer."
-              );
-          } else {
-            const product = await dealers.findOne(
-              {
-                _id: dealer,
-                "products._id": cartProduct,
-              },
-              { "products.$": true }
-            );
-            const quantity = req.body.quantity;
-            const dealerId = product._id;
-            const productId = product.products[0]._id;
-            const price = product.products[0].price;
-            const defaultImage = product.products[0].defaultImage;
-            const productName = product.products[0].productName;
-            const description = product.products[0].description;
-
-            const existingCart = await users.find({
-              "cart.productId": cartProduct,
-            });
-
-            if (existingCart.length > 0) {
-              const quantity = await users.findOne(
-                {
-                  _id: userId,
-                  "cart.productId": cartProduct,
-                },
-                { "cart.quantity.$": true }
-              );
-
-              let existingQuantity = quantity.cart[0].quantity;
-              let updatedQuantity = ++existingQuantity;
-
-              const addCart = await users.updateOne(
-                {
-                  _id: userId,
-                  "cart.productId": cartProduct,
-                },
-                { $set: { "cart.$.quantity": updatedQuantity } }
-              );
-            } else {
-              const shop = await users.updateOne(
-                { _id: userId },
-                { selectedShop: dealer }
-              );
-              const cart = await users.updateOne(
-                { _id: userId },
-                {
-                  $push: {
-                    cart: {
-                      productName: productName,
-                      dealerId: dealerId,
-                      productId: productId,
-                      price: price,
-                      defaultImage: defaultImage,
-                      quantity: quantity,
-                      description: description,
-                    },
-                  },
-                }
-              );
-            }
-            res.status(200).send("Successfully added to cart");
-          }
-        }
-
-        if (user.cart.length == 0) {
-          const product = await dealers.findOne(
-            {
-              _id: dealer,
-              "products._id": cartProduct,
-            },
-            { "products.$": true }
-          );
-          const quantity = req.body.quantity;
-          const dealerId = product._id;
-          const productId = product.products[0]._id;
-          const price = product.products[0].price;
-          const defaultImage = product.products[0].defaultImage;
-          const productName = product.products[0].productName;
-          const description = product.products[0].description;
-
-          const existingCart = await users.find({
-            "cart.productId": cartProduct,
-          });
-
-          if (existingCart.length > 0) {
-            const quantity = await users.findOne(
-              {
-                _id: userId,
-                "cart.productId": cartProduct,
-              },
-              { "cart.quantity.$": true }
-            );
-
-            let existingQuantity = quantity.cart[0].quantity;
-            let updatedQuantity = ++existingQuantity;
-
-            const addCart = await users.updateOne(
-              {
-                _id: userId,
-                "cart.productId": cartProduct,
-              },
-              { $set: { "cart.$.quantity": updatedQuantity } }
-            );
-          } else {
-            const shop = await users.updateOne(
-              { _id: userId },
-              { selectedShop: dealer }
-            );
-            const cart = await users.updateOne(
-              { _id: userId },
-              {
-                $push: {
-                  cart: {
-                    productName: productName,
-                    dealerId: dealerId,
-                    productId: productId,
-                    price: price,
-                    defaultImage: defaultImage,
-                    quantity: quantity,
-                    description: description,
-                  },
-                },
-              }
-            );
-          }
-          res.status(200).send("Successfully added to cart");
-        }
-      } catch (error) {
-        res.status(400).send("Add cart failed");
-      }
-    },
-    delete: async (req, res) => {
-      try {
-        const data = req.body;
-        const productId = data.productId;
-        const product = await users.findOneAndUpdate(
-          { _id: data.id },
-          {
-            $pull: {
-              cart: {
-                productId: productId,
-              },
-            },
-          }
-        );
-        res.status(202).send("Successfully removed from cart");
-      } catch (error) {
-        res.status(400).send("Add product failed");
-      }
-    },
-  },
   payment: {
     post: async (req, res) => {
       try {
@@ -516,97 +270,6 @@ module.exports = {
       }
     },
   },
-
-  checkout: {
-    post: async (req, res) => {
-      try {
-        const feedback = {
-          message: "Awaiting feedback",
-          rating: 0,
-        };
-        const userId = req.body.id;
-        const user = await users.findOne({ _id: userId });
-
-        let totalAmount = 0;
-        let noOfItems = 0;
-        let dealerId = user.cart[0].dealerId;
-        user.cart.forEach((products) => {
-          totalAmount = totalAmount + products.price * products.quantity;
-          noOfItems = noOfItems + products.quantity;
-        });
-
-        const order = await orders.insertMany({
-          orderId: "My-mart:" + crypto.randomBytes(7).toString("hex"),
-          userId: userId,
-          userName: user.fullName,
-          dealerId: dealerId,
-          orderDate: new Date().toLocaleString(),
-          address: user.address,
-          quantity: noOfItems,
-          totalAmount: totalAmount,
-          paymentMode: "online",
-          paymentStatus: false,
-          orderStatus: "pending",
-          items: user.cart,
-          feedback: feedback,
-        });
-        const clearCart = await users.findOneAndUpdate(
-          { _id: userId },
-          { $set: { cart: [] } }
-        );
-        res.status(200).send("Payment Successful");
-      } catch (error) {
-        res.status(400).send("Bad Request");
-      }
-    },
-  },
-
-  feedback: {
-    post: async (req, res) => {
-      try {
-        const data = req.body;
-        const orderId = data.orderId;
-        const feedback = await orders.updateOne(
-          { userId: data.id, _id: orderId, orderStatus: "delivered" },
-          {
-            $set: {
-              feedback: { message: data.feedback, rating: data.rating },
-            },
-          }
-        );
-        if (feedback.modifiedCount > 0) {
-          res.status(202).send("Successfully updated feedback");
-        } else {
-          res.status(400).send("Feedback update failed");
-        }
-      } catch (error) {
-        res.status(400).send("Something went wrong");
-      }
-    },
-  },
-
-  orderHistory: {
-    get: async (req, res) => {
-      try {
-        const userId = req.body.id;
-        const orderHistory = await orders.find({ userId: userId });
-        res.status(200).json(orderHistory);
-      } catch (error) {
-        res.status(404).send("Not Found");
-      }
-    },
-  },
-
-  logout: {
-    get: (req, res) => {
-      try {
-        const data = req.body;
-        const userToken = jwt.sign({ id: data.id }, jwt_key);
-        res.cookie("userId", userToken, { maxAge: 0, httpOnly: true });
-        res.status(202).send("Accepted");
-      } catch (error) {
-        res.status(400).send("Bad Request");
-      }
-    },
-  },
 };
+
+module.exports = userController;

@@ -15,6 +15,7 @@ const productController = {
       description,
       tag,
     } = req.body;
+
     const newProduct = await productsModel.create({
       dealer: dealerId,
       name: name,
@@ -38,7 +39,9 @@ const productController = {
   },
 
   getProducts: async (req, res) => {
-    const products = await productsModel.find({ isDeleted: false });
+
+    const filter = {isDeleted: false}
+    const products = await productsModel.find(filter);
     res.status(200).json({
       status: "success",
       message: "Successfully fetched categories",
