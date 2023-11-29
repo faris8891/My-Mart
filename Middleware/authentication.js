@@ -31,7 +31,7 @@ module.exports.authentication = {
   },
   users: async (req, res, next) => {
     try {
-      let userId = req.headers.authorization;
+      let userId = req.headers.authorization.split(" ")[1];
       let data = jwt.verify(userId, JWT_USER_KEY).id;
       req.body.id = data;
       next();
