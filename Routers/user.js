@@ -2,11 +2,13 @@ const express = require("express");
 const router = express.Router();
 const { authentication } = require("../Middleware/authentication");
 const {tryCatch} = require("../Middleware/tryCatch");
-const { registerUsers , loginUsers} = require("../Controllers/user-controller");
+const { registerUsers , loginUsers,addToCart} = require("../Controllers/user-controller");
 
 router.route("/register").post(tryCatch(registerUsers));
 
 router.route("/login").post(tryCatch(loginUsers))
+
+router.route("/add-to-cart").post(authentication.users, tryCatch(addToCart))
 
 // ============================================== OLD ================================================>>
 // router.post("/login", login.post);

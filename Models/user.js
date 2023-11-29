@@ -64,20 +64,6 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    cart: [
-      {
-        dealerId: {
-          type: mongoose.Types.ObjectId,
-          required: true,
-          // ref:"add dealers collection"
-        },
-        productId: {
-          type: mongoose.Types.ObjectId,
-          required: true,
-          // ref:"create new collection for products"
-        },
-      },
-    ],
   },
   {
     timestamps: {
