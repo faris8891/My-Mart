@@ -1,5 +1,5 @@
 const usersModel = require("../Models/user");
-const cartModal = require("../Models/cart");
+const cartModel = require("../Models/cart");
 const dealers = require("../Models/dealer");
 const orders = require("../Models/orders");
 const bcrypt = require("bcrypt");
@@ -70,27 +70,41 @@ const userController = {
     });
   },
 
+  getCart: async (req, res) => {
+    const { id } = req.body
+    const filter = {userId:id}
+    const cart = await cartModel.find(filter).populate("cart.productId")
+
+    res.status(200).json({
+      status: " success",
+      message: "Successfully fetched cart",
+      data: {
+        cart: cart,
+      },
+    });
+  },
+
   addToCart: async (req, res) => {
     const { dealerId, productId, quantity, id } = req.body;
 
     //If there is no cart for user then will create a new cart
     const findCart = { userId: id };
-    const checkExistCart = await cartModal.countDocuments(findCart);
+    const checkExistCart = await cartModel.countDocuments(findCart);
     if (!Boolean(checkExistCart)) {
       const cart = {
         userId: id,
         cart: [],
       };
-      const createCart = await cartModal.create(cart);
+      const createCart = await cartModel.create(cart);
       createCart.save();
     }
 
     const filter = { userId: id, "cart.productId": productId };
-    const checkExistInCart = await cartModal.countDocuments(filter);
+    const checkExistInCart = await cartModel.countDocuments(filter);
 
     if (Boolean(checkExistInCart)) {
       const increment = { $inc: { "cart.$.quantity": 1 } };
-      const incrementQuantity = await cartModal
+      const incrementQuantity = await cartModel
         .findOneAndUpdate(filter, increment, { new: true })
         .populate({ path: "cart.productId" })
         .select({ cart: 1 });
@@ -112,7 +126,7 @@ const userController = {
           },
         },
       };
-      const addToCart = await cartModal
+      const addToCart = await cartModel
         .findOneAndUpdate(findCart, update, { new: true })
         .populate({ path: "cart.productId" })
         .select({ cart: 1 });
