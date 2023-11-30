@@ -73,7 +73,7 @@ const userController = {
   getCart: async (req, res) => {
     const { id } = req.body;
     const filter = { userId: id };
-    const cart = await cartModel.find(filter).populate("cart.productId");
+    const cart = await cartModel.find(filter).populate("productId");
 
     res.status(200).json({
       status: " success",
