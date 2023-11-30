@@ -71,9 +71,9 @@ const userController = {
   },
 
   getCart: async (req, res) => {
-    const { id } = req.body
-    const filter = {userId:id}
-    const cart = await cartModel.find(filter).populate("cart.productId")
+    const { id } = req.body;
+    const filter = { userId: id };
+    const cart = await cartModel.find(filter).populate("cart.productId");
 
     res.status(200).json({
       status: " success",
@@ -87,65 +87,42 @@ const userController = {
   addToCart: async (req, res) => {
     const { dealerId, productId, quantity, id } = req.body;
 
-    //If there is no cart for user then will create a new cart
-    const findCart = { userId: id };
-    const checkExistCart = await cartModel.countDocuments(findCart);
-    if (!Boolean(checkExistCart)) {
-      const cart = {
-        userId: id,
-        cart: [],
-      };
-      const createCart = await cartModel.create(cart);
-      createCart.save();
-    }
-
-    const filter = { userId: id, "cart.productId": productId };
+    const filter = { userId: id, productId: productId, dealerId: dealerId };
     const checkExistInCart = await cartModel.countDocuments(filter);
 
     if (Boolean(checkExistInCart)) {
-      const increment = { $inc: { "cart.$.quantity": 1 } };
-      const incrementQuantity = await cartModel
+      const increment = { $inc: { quantity: 1 } };
+      const incrementedProduct = await cartModel
         .findOneAndUpdate(filter, increment, { new: true })
-        .populate({ path: "cart.productId" })
-        .select({ cart: 1 });
+        .populate({ path: "productId" });
 
       res.status(200).json({
         status: " success",
         message: "Successfully incremented quantity",
         data: {
-          cart: incrementQuantity,
+          cart: incrementedProduct,
         },
       });
     } else {
-      const update = {
-        $addToSet: {
-          cart: {
-            dealerId: dealerId,
-            productId: productId,
-            quantity: quantity,
-          },
-        },
+      const Product = {
+          userId: id,
+          dealerId: dealerId,
+          productId: productId,
+          quantity: quantity,
       };
-      const addToCart = await cartModel
-        .findOneAndUpdate(findCart, update, { new: true })
-        .populate({ path: "cart.productId" })
-        .select({ cart: 1 });
+      const addedToCart = await cartModel
+        .create( Product)
+        .populate({ path: productId })
+
 
       res.status(200).json({
         status: " success",
         message: "Successfully added to cart",
         data: {
-          cart: addToCart,
+          cart: addedToCart,
         },
       });
     }
-
-    const appError = new AppError(
-      "Failed",
-      "Something went wrong! please try again.",
-      400
-    );
-    ErrorHandler(appError, req, res);
   },
 
   // const filter = { _id: id, "cart.productId": { $ne: productId } };

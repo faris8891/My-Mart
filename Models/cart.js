@@ -6,24 +6,21 @@ const cartSchema = new mongoose.Schema(
       ref: "users",
       required: true,
     },
-    cart: [
-      {
-        dealerId: {
-          type: mongoose.Types.ObjectId,
-          required: true,
-          ref: "dealers",
-        },
-        productId: {
-          type: mongoose.Types.ObjectId,
-          required: true,
-          ref: "products",
-        },
-        quantity: {
-          type: Number,
-          required: true,
-        },
-      },
-    ],
+
+    dealerId: {
+      type: mongoose.Types.ObjectId,
+      required: true,
+      ref: "dealers",
+    },
+    productId: {
+      type: mongoose.Types.ObjectId,
+      required: true,
+      ref: "products",
+    },
+    quantity: {
+      type: Number,
+      required: true,
+    },
   },
   {
     timestamps: {
@@ -32,5 +29,7 @@ const cartSchema = new mongoose.Schema(
     },
   }
 );
+
+cartSchema.index({ userId: 1, dealerId: 1, productId: 1 }, { unique: true });
 
 module.exports = mongoose.model("carts", cartSchema);
