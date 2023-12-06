@@ -75,11 +75,19 @@ const userController = {
     const filter = { userId: id };
     const cart = await cartModel.find(filter).populate("productId");
 
+    let totalAmount =0
+    cart.forEach((item) => {
+      const price = item?.productId?.price
+      const quantity = item?.quantity
+      totalAmount = totalAmount+(price*quantity)
+    })
+
     res.status(200).json({
       status: " success",
       message: "Successfully fetched cart",
       data: {
         cart: cart,
+        totalAmount:totalAmount
       },
     });
   },
@@ -125,7 +133,6 @@ const userController = {
     }
   },
 
-  // const filter = { _id: id, "cart.productId": { $ne: productId } };
 
   // ========================================== OLD =======================================>>
   // otpLogin: {
