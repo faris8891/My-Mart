@@ -31,24 +31,44 @@ const userSchema = new mongoose.Schema(
       {
         state: {
           type: String,
+          trim: true,
+          lowercase: true,
+          required: true,
         },
         district: {
           type: String,
+          trim: true,
+          lowercase: true,
+          required: true,
         },
         city: {
           type: String,
+          trim: true,
+          lowercase: true,
+          required: true,
         },
         street: {
           type: String,
+          trim: true,
+          lowercase: true,
+          required: true,
         },
         landmark: {
           type: String,
+          trim: true,
+          lowercase: true,
         },
         pinCode: {
           type: String,
+          trim: true,
+          lowercase: true,
+          required: true,
         },
         flatNo: {
           type: String,
+          trim: true,
+          lowercase: true,
+          required: true,
         },
       },
     ],

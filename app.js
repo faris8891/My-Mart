@@ -3,17 +3,16 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 
-
-const logger = require("./Util/winstonLogger")
+const logger = require("./Util/winstonLogger");
 const morganMiddleware = require("./Util/morganMiddleware");
 
 const cookie = require("cookie-parser");
 app.use(cookie());
 app.use(bodyParser.json());
-app.use(cors())
-app.use(morganMiddleware)
+app.use(cors());
+app.use(morganMiddleware);
 
-const {tryCatch} = require("./Middleware/tryCatch")
+const { tryCatch } = require("./Middleware/tryCatch");
 
 // -----------------ENV---------------------
 require("dotenv").config();
@@ -23,10 +22,14 @@ const key = process.env.SECRET_KEY;
 
 // -----------------Database Connection---------------------
 const mongoose = require("mongoose");
-mongoose.connect(key).then(() => {logger.info("Mongo DB Connected")}).catch((error) => logger.error("Failed to connect DB", error.message))
+mongoose
+  .connect(key)
+  .then(() => {
+    logger.info("Mongo DB Connected");
+  })
+  .catch((error) => logger.error("Failed to connect DB", error.message));
 
 // -----------------Routers---------------------
-
 
 const userRouter = require("./Routers/user");
 app.use("/api/users", userRouter);
@@ -37,14 +40,14 @@ app.use("/api/dealers", dealerRouter);
 const adminRouter = require("./Routers/admin");
 app.use("/admin", adminRouter);
 
-const productsRouter = require("./Routers/products")
-app.use("/api/products", productsRouter)
+const productsRouter = require("./Routers/products");
+app.use("/api/products", productsRouter);
 
+const ordersRouter = require("./Routers/orders");
+app.use("/api/orders", ordersRouter);
 
 const { ErrorHandler } = require("./Util/errorHandling");
-app.use(ErrorHandler)
-
-
+app.use(ErrorHandler);
 
 // -----------------Express server connect---------------------
 app.listen(port, () => {

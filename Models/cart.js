@@ -21,6 +21,10 @@ const cartSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    isOrdered: {
+      type: Boolean,
+      default:false
+    },
   },
   {
     timestamps: {
