@@ -25,7 +25,6 @@ async function handleUpload(file) {
 module.exports = {
   dealersRegister: async (req, res) => {
     try {
-      console.log(req.body);
       const { fullName, shopName, email, password, phone, location, address } =
         req.body;
       const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -74,7 +73,7 @@ module.exports = {
       });
       bcrypt.compare(password, dealer.password, function (err, result) {
         if (result === true && email === dealer.email) {
-          const dealerToken = jwt.sign({ id: dealer._id }, jwt_key,);
+          const dealerToken = jwt.sign({ id: dealer._id }, jwt_key);
           res.status(200).json({
             status: "success",
             message: "You have logged successfully",
@@ -96,193 +95,29 @@ module.exports = {
       });
     }
   },
-  
+
+  paymentMod: async (req, res) => {
+    const query = req.query;
+    const { id } = req.body;
+    const filter = {
+      _id: id,
+      isActive: true,
+      isDeleted: false,
+    };
+
+    const updatePayment = await dealers.findOneAndUpdate(filter, query, {
+      new: true,
+    });
+    res.status(200).json({
+      status: " success",
+      message: "Successfully updated payment mode",
+      data: {
+        updatedPayment: updatePayment,
+      },
+    });
+  },
+
   //XXX Pending ================================================>>
-  products: {
-    get: async (req, res) => {
-      try {
-        const dealerId = req.body.id;
-        const products = await dealers.find(
-          { _id: dealerId },
-          { products: 1, _id: 0 }
-        );
-        res.status(200).json(products[0]);
-      } catch (error) {
-        res.status(404).send("Not Found");
-      }
-    },
-
-    post: async (req, res) => {
-      try {
-        const dealerId = req.body.id;
-        const data = req.body;
-        const b64 = Buffer.from(req.file.buffer).toString("base64");
-        let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
-        const cldRes = await handleUpload(dataURI);
-        const product = await dealers.updateOne(
-          { _id: dealerId },
-          {
-            $push: {
-              products: {
-                productName: data.productName,
-                price: data.price,
-                category: data.category,
-                noOfItem: data.noOfItem,
-                defaultImage: cldRes.secure_url,
-                productImages: data.description,
-                description: data.description,
-                productActive: data.productActive,
-              },
-            },
-          } 
-        );
-        res.status(200).send("New product added successfully");
-      } catch (error) {
-        res.status(400).send("Bad Request");
-      }
-    },
-
-    put: async (req, res) => {
-      try {
-        const data = req.body;
-        const dealerId = data.id;
-        const productId = data.productId;
-        // const b64 = Buffer.from(req.file.buffer).toString("base64");
-        // let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
-        // const cldRes = await handleUpload(dataURI);
-        const { productName, price, category, noOfItem, description } = data;
-        const product = await dealers.updateOne(
-          { _id: dealerId, "products._id": productId },
-          {
-            $set: {
-              "products.$.productName": productName,
-              "products.$.price": price,
-              "products.$.category": category,
-              "products.$.noOfItem": noOfItem,
-              "products.$.description": description,
-              // "products.$.defaultImage": cldRes.secure_url,
-            },
-          }
-        );
-        res.status(202).send("Product updated successfully");
-      } catch (error) {
-        res.status(400).send("Bad Request");
-      }
-    },
-
-    patch: async (req, res) => {
-      try {
-        const data = req.body;
-        const dealerId = req.body.id;
-        const productId = req.body.productId;
-        const product = await dealers.updateOne(
-          {
-            _id: dealerId,
-            "products._id": productId,
-          },
-          { $set: { "products.$.productActive": data.productStatus } }
-        );
-        if (product.acknowledged) {
-          res.status(202).send("Product updated successfully");
-        } else {
-          res.status(400).send("Product update failed");
-        }
-      } catch (error) {
-        res.status(400).send("Product update failed");
-      }
-    },
-    delete: async (req, res) => {
-      try {
-        const data = req.body;
-        const dealerId = data.id;
-        const productId = data.productId;
-        const product = await dealers.updateOne(
-          { _id: dealerId },
-          { $pull: { products: { _id: productId } } }
-        );
-        if (product.acknowledged == true && product.modifiedCount != 0) {
-          res.status(202).send("Product successfully removed");
-        } else {
-          res.status(400).send("Product remove failed");
-        }
-      } catch (error) {
-        res.status(400).send("Something wrong ");
-      }
-    },
-  },
-
-
-  profile: {
-    get: async (req, res) => {
-      try {
-        const id = req.body.id;
-        const userData = await dealers.findOne(
-          { _id: id },
-          { products: 0, password: 0, userName: 0, orders: 0 }
-        );
-        res.status(200).json(userData);
-      } catch (error) {
-        res.status(404).send("Not Found");
-      }
-    },
-    put: async (req, res) => {
-      try {
-        id = req.body.id;
-        const dealerData = req.body;
-        const password = await bcrypt.hash(dealerData.password, saltRounds);
-        dealerUpdate = await dealers.updateOne(
-          { _id: id },
-          {
-            fullName: dealerData.fullName,
-            userName: dealerData.userName,
-            password: password,
-            storeImage: dealerData.storeImage,
-          }
-        );
-        res.status(202).send("Accepted");
-      } catch (error) {
-        res.status(400).send("Bad Request");
-      }
-    },
-  },
-
-  COD: {
-    patch: async (req, res) => {
-      try {
-        const dealersId = req.body.id;
-        const updateCOD = await dealers.updateOne(
-          { _id: dealersId },
-          { COD: req.body.COD }
-        );
-        if (updateCOD.modifiedCount > 0) {
-          res.status(202).send("COD updated successfully");
-        } else {
-          res.status(400).send("COD update failed");
-        }
-      } catch (error) {
-        res.status(400).send("Something went wrong");
-      }
-    },
-  },
-
-  onlinePayment: {
-    patch: async (req, res) => {
-      try {
-        const dealersId = req.body.id;
-        const updateOnlinePayment = await dealers.updateOne(
-          { _id: dealersId },
-          { onlinePayment: req.body.onlinePayment }
-        );
-        if (updateOnlinePayment.modifiedCount > 0) {
-          res.status(202).send("Online payment updated successfully");
-        } else {
-          res.status(400).send("Online payment update failed");
-        }
-      } catch (error) {
-        res.status(400).send("Something went wrong");
-      }
-    },
-  },
 
   shopClose: {
     patch: async (req, res) => {
@@ -298,7 +133,6 @@ module.exports = {
       }
     },
   },
-
 
   orders: {
     get: async (req, res) => {

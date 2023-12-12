@@ -5,12 +5,15 @@ const upload = require("../Middleware/Storage");
 const {
   dealersRegister,
   dealersLogin,
+  paymentMod,
 } = require("../Controllers/dealer-controller");
 const { tryCatch } = require("../Middleware/tryCatch");
 
 router.route("/login").post(tryCatch(dealersLogin));
 
 router.route("/register").post(tryCatch(dealersRegister));
+
+router.route("/payment-update").patch(authentication.dealers ,tryCatch(paymentMod));
 
 // =========================OLD========================>>
 
