@@ -21,11 +21,7 @@ const orderController = {
     const paymentMode = req.body.paymentMode;
 
     if (paymentMode.toLowerCase() !== "cod") {
-      const appError = new AppError(
-        "Failed",
-        "Invalid payment mode",
-        400
-      );
+      const appError = new AppError("Failed", "Invalid payment mode", 400);
       ErrorHandler(appError, req, res);
     }
 
@@ -91,10 +87,6 @@ const orderController = {
 
   createOnlineOrders: async (req, res) => {
     const data = req.params.orderId;
-    const feedback = {
-      message: "Awaiting feedback",
-      rating: 0,
-    };
     const razorpaySignature = req.body.razorpay_signature;
     const razorpayPaymentId = req.body.razorpay_payment_id;
     const orderId = jwt.verify(data, jwt_key).orderId;
@@ -145,13 +137,32 @@ const orderController = {
         },
       });
     } else {
-      const appError = new AppError(
-        "Failed",
-        "Payment failed",
-        400
-      );
+      const appError = new AppError("Failed", "Payment failed", 400);
       ErrorHandler(appError, req, res);
     }
+  },
+
+  updateOrderStatus: async (req, res) => {
+    const userId = req.body.id;
+    const query = req.query;
+    const orderId = req.params.orderId
+
+    const filter = {
+      _id: orderId,
+      dealerId: userId,
+    };
+
+    const updateStatus = await orderModel.findOneAndUpdate(filter, query, {
+      new: true,
+    });
+
+    res.status(200).json({
+      status: " success",
+      message: "Successfully updated order status",
+      data: {
+        updatedOrder: updateStatus,
+      },
+    });
   },
 };
 
