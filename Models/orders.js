@@ -63,6 +63,10 @@ const orderSchema = new mongoose.Schema(
     promotions: {
       type: Array,
     },
+    isDelivered: {
+      type:Boolean,
+      default:false
+    },
     address: {
       state: {
         type: String,
