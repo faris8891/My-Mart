@@ -164,6 +164,28 @@ const orderController = {
       },
     });
   },
+  updateDeliveredStatus: async (req, res) => {
+    const userId = req.body.id;
+    const query = req.query;
+
+    const filter = {
+      _id: orderId,
+      userId: userId,
+    };
+    
+    const updateDeliveredStatus = await orderModel.findOneAndUpdate(filter, query, {
+      new: true,
+    });
+
+    res.status(200).json({
+      status: " success",
+      message: "Successfully updated order status",
+      data: {
+        updatedOrder: updateDeliveredStatus,
+      },
+    });
+  }
+
 };
 
 module.exports = orderController;

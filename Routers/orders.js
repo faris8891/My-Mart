@@ -17,5 +17,8 @@ router
 router
   .route("/status/:orderId")
   .patch(authentication.dealers, tryCatch(updateOrderStatus));
+router
+  .route("/delivered-status/:orderId")
+  .patch(authentication.users, tryCatch(updateOrderStatus));
 
 module.exports = router;
