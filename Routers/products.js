@@ -9,6 +9,7 @@ const {
   getCategories,
   getProduct,
   activateProduct,
+  deleteProduct
 } = require("../Controllers/ProductsController");
 
 router
@@ -18,7 +19,8 @@ router
 
 router.route("/:id")
   .get(tryCatch(getProduct))
-  .patch(authentication.dealers, tryCatch(activateProduct));
+  .patch(authentication.dealers, tryCatch(activateProduct))
+  .delete(authentication.dealers, tryCatch(deleteProduct))
 
 router
   .route("/category")
