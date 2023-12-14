@@ -7,7 +7,8 @@ const {
   createCodOrders,
   createOnlineOrders,
   updateOrderStatus,
-  updateDeliveredStatus
+  updateDeliveredStatus,
+  getActiveOrders
 } = require("../Controllers/ordersControllers");
 
 router.route("/cod").post(authentication.users, tryCatch(createCodOrders));
@@ -18,8 +19,13 @@ router
 router
   .route("/status/:orderId")
   .patch(authentication.dealers, tryCatch(updateOrderStatus));
+
 router
   .route("/delivered-status/:orderId")
   .patch(authentication.users, tryCatch(updateDeliveredStatus));
+
+router
+  .route("/active-orders")
+  .patch(authentication.users, tryCatch(getActiveOrders));
 
 module.exports = router;

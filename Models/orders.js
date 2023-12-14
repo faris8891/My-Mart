@@ -114,6 +114,10 @@ const orderSchema = new mongoose.Schema(
       message: { type: String },
       rating: { type: Number, min: 1, max: 5 },
     },
+    idDeleted: {
+      type: Boolean,
+      default:false
+    }
   },
   {
     timestamps: {
