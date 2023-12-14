@@ -26,6 +26,9 @@ router
 
 router
   .route("/active-orders")
-  .patch(authentication.users, tryCatch(getActiveOrders));
+  .get(authentication.users, tryCatch(getActiveOrders));
+router
+  .route("/active-orders")
+  .get(authentication.users, tryCatch(getActiveOrders));
 
 module.exports = router;

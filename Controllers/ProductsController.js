@@ -39,8 +39,7 @@ const productController = {
   },
 
   getProducts: async (req, res) => {
-
-    const filter = {isDeleted: false}
+    const filter = { isDeleted: false };
     const products = await productsModel.find(filter);
     res.status(200).json({
       status: "success",
@@ -63,6 +62,27 @@ const productController = {
       data: {
         product: product,
       },
+    });
+  },
+
+  deleteProduct: async (req, res) => {
+    const dealerId = req.body.id;
+    const { productId } = req.params;
+
+    const filter = {
+      _id: productId,
+      isDeleted: false,
+      dealer: dealerId,
+    };
+    const update = {
+      isDeleted: true,
+    };
+
+    const deletedProduct = await productsModel.findOneAndUpdate(filter, update);
+
+    res.status(200).json({
+      status: " success",
+      message: "Successfully deleted product",
     });
   },
 
