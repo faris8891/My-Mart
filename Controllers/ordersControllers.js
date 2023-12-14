@@ -145,11 +145,12 @@ const orderController = {
   updateOrderStatus: async (req, res) => {
     const userId = req.body.id;
     const query = req.query;
-    const orderId = req.params.orderId
+    const orderId = req.params.orderId;
 
     const filter = {
       _id: orderId,
       dealerId: userId,
+      isDeleted:false,
     };
 
     const updateStatus = await orderModel.findOneAndUpdate(filter, query, {
@@ -166,16 +167,25 @@ const orderController = {
   },
   updateDeliveredStatus: async (req, res) => {
     const userId = req.body.id;
-    const query = req.query;
+    const { isDelivered } = req.query;
 
     const filter = {
       _id: orderId,
       userId: userId,
+      isDeleted:false,
     };
-    
-    const updateDeliveredStatus = await orderModel.findOneAndUpdate(filter, query, {
-      new: true,
-    });
+
+    const update = {
+      isDelivered: isDelivered,
+    };
+
+    const updateDeliveredStatus = await orderModel.findOneAndUpdate(
+      filter,
+      update,
+      {
+        new: true,
+      }
+    );
 
     res.status(200).json({
       status: " success",
@@ -184,8 +194,25 @@ const orderController = {
         updatedOrder: updateDeliveredStatus,
       },
     });
-  }
+  },
 
+  getActiveOrders: async (req, res) => {
+    const userId = req.body.id; // separate the user and dealers and admin with permissions
+    const filter = {
+      isDeleted: false,
+      orderStatus: { $in: ["pending", "confirmed", "shipped"] },
+      userId:userId
+    };
+    const activeOrders = await orderModel.find(filter).populate("product");
+
+    res.status(200).json({
+      status: " success",
+      message: "Successfully fetched active orders",
+      data: {
+        activeOrders: activeOrders,
+      },
+    });
+  },
 };
 
 module.exports = orderController;
