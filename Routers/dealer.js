@@ -6,6 +6,7 @@ const {
   dealersRegister,
   dealersLogin,
   paymentMod,
+  updateShopStatus
 } = require("../Controllers/dealer-controller");
 const { tryCatch } = require("../Middleware/tryCatch");
 
@@ -13,7 +14,9 @@ router.route("/login").post(tryCatch(dealersLogin));
 
 router.route("/register").post(tryCatch(dealersRegister));
 
-router.route("/payment-update").patch(authentication.dealers ,tryCatch(paymentMod));
+router.route("/payment-update").patch(authentication.dealers, tryCatch(paymentMod));
+
+router.route("/update-shop-status").patch(authentication.dealers ,tryCatch(updateShopStatus));
 
 // =========================OLD========================>>
 
