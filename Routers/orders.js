@@ -8,7 +8,8 @@ const {
   createOnlineOrders,
   updateOrderStatus,
   updateDeliveredStatus,
-  getActiveOrders
+  getActiveOrders,
+  getOrderHistory
 } = require("../Controllers/ordersControllers");
 
 router.route("/cod").post(authentication.users, tryCatch(createCodOrders));
@@ -27,8 +28,9 @@ router
 router
   .route("/active-orders")
   .get(authentication.users, tryCatch(getActiveOrders));
+
 router
-  .route("/active-orders")
-  .get(authentication.users, tryCatch(getActiveOrders));
+  .route("/history")
+  .get(authentication.users, tryCatch(getOrderHistory));
 
 module.exports = router;
