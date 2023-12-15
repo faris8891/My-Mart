@@ -117,6 +117,26 @@ module.exports = {
     });
   },
 
+  updateShopStatus: async (req, res) => {
+    const dealersId = req.body.id;
+    const filter = {
+      _id: dealersId,
+      isActive: true,
+      isDeleted: false,
+    };
+
+    const updateShopStatus = await dealers.findOneAndUpdate(filter, query, {
+      new: true,
+    });
+    res.status(200).json({
+      status: " success",
+      message: "Successfully updated shop status",
+      data: {
+        profile: updateShopStatus,
+      },
+    });
+  },
+
   //XXX Pending ================================================>>
 
   shopClose: {

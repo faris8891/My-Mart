@@ -226,7 +226,7 @@ const orderController = {
       status: " success",
       message: "Successfully fetched orderHistory",
       data: {
-        activeOrders: orderHistory,
+        orderHistory: orderHistory,
       },
     });
   }
