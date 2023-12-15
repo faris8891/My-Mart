@@ -213,6 +213,23 @@ const orderController = {
       },
     });
   },
+  getOrderHistory: async (req, res) => {
+    const userId = req.body.id; // separate the user and dealers and admin with permissions
+    const filter = {
+      isDeleted: false,
+      orderStatus: { $in: ["delivered", "cancelled"] },
+      userId:userId
+    };
+    const orderHistory = await orderModel.find(filter).populate("product");
+
+    res.status(200).json({
+      status: " success",
+      message: "Successfully fetched orderHistory",
+      data: {
+        activeOrders: orderHistory,
+      },
+    });
+  }
 };
 
 module.exports = orderController;
